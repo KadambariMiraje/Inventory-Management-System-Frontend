@@ -1,0 +1,523 @@
+/* 
+   Navbar Branding */
+
+.logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: cover;
+}
+
+.brand-title {
+  font-size: 18px;
+  color: #134e4a;
+}
+
+.brand-subtitle {
+  font-size: 18px;
+  color: #5eada6;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   Avatar
+========================= */
+
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  background: #0d9488;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* =========================
+   User Info
+========================= */
+
+.user-name {
+  font-size: 16px;
+  color: #134e4a;
+}
+
+.user-role {
+  font-size: 14px;/* ── IMS Navbar ────────────────────────────────────────────────────── */
+
+.ims-navbar {
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4f5f2;
+  box-shadow: 0 1px 10px rgba(13, 148, 136, 0.07);
+  z-index: 1050;
+}
+
+/* ── Logo ─────────────────────────────────────────────────────────── */
+
+.nav-logo-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #ccfbf1;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ── Brand text ───────────────────────────────────────────────────── */
+
+.nav-brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #134e4a;
+  line-height: 1.3;
+  letter-spacing: -0.2px;
+}
+
+.nav-brand-sub {
+  font-size: 11px;
+  color: #5eada6;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+}
+
+/* ── Avatar ───────────────────────────────────────────────────────── */
+
+.nav-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #ccfbf1;
+}
+
+/* ── User text ────────────────────────────────────────────────────── */
+
+.nav-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #134e4a;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-user-role {
+  font-size: 11px;
+  color: #5eada6;
+  text-transform: capitalize;
+  line-height: 1.4;
+}
+
+/* ── Role badge ───────────────────────────────────────────────────── */
+
+.nav-role-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: #ccfbf1;
+  color: #0f766e;
+  letter-spacing: 0.4px;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────── */
+
+.nav-vr {
+  width: 1px;
+  height: 28px;
+  background: #d1fae5;
+}
+
+/* ── Logout button ────────────────────────────────────────────────── */
+
+.nav-logout-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0d9488;
+  border: 1.5px solid #0d9488;
+  border-radius: 8px;
+  padding: 6px 16px;
+  background: transparent;
+  transition: background 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+}
+
+.nav-logout-btn:hover {
+  background: #f0fdfa;
+  color: #0d9488;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.12);
+}
+
+.nav-logout-btn:active {
+  background: #ccfbf1;
+  transform: scale(0.98);
+}
+
+/* ── Auth buttons (logged-out state) ──────────────────────────────── */
+
+.nav-outline-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0d9488;
+  border: 1.5px solid #0d9488;
+  border-radius: 8px;
+  padding: 6px 18px;
+  background: transparent;
+  text-decoration: none;
+  transition: background 0.18s;
+}
+
+.nav-outline-btn:hover {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.nav-solid-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  border: 1.5px solid #0d9488;
+  border-radius: 8px;
+  padding: 6px 18px;
+  background: #0d9488;
+  text-decoration: none;
+  transition: background 0.18s;
+}
+
+.nav-solid-btn:hover {
+  background: #0f766e;
+  color: #ffffff;
+  border-color: #0f766e;
+}
+
+/* ── Body offset so content clears the fixed navbar ──────────────── */
+
+body {
+  padding-top: 64px !important;
+}
+}
+
+/* =========================
+   Logout Button
+========================= */
+
+.btn-auth {
+  border: 1.5px solid #0d9488;
+  color: #0d9488;
+  font-size: 18px;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+/* =========================
+   Fix content under navbar
+========================= */
+
+body {
+  padding-top: 60px;
+}
+
+
+
+
+/* ------------------------------------------------------ Login Page --------------------------------------------------------*/
+
+/* =========================
+   Login Page
+========================= */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 60%);
+  position: relative;
+}
+
+/* Decorative blobs */
+.login-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.login-blob.top {
+  top: -80px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background: rgba(13, 148, 136, 0.07);
+}
+
+.login-blob.bottom {
+  bottom: -60px;
+  left: -60px;
+  width: 240px;
+  height: 240px;
+  background: rgba(13, 148, 136, 0.05);
+}
+
+/* Card */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px;
+  padding: 8px;
+}
+
+/* Logo */
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+
+/* Title */
+.login-title {
+  color: #134e4a;
+}
+
+/* Subtitle */
+.login-subtitle {
+  font-size: 18px;
+}
+
+/* Labels */
+.login-label {
+  font-size: 18px;
+  color: #1f5f5b;
+}
+
+/* Inputs */
+.login-input {
+  border-color: #99f6e4;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* Button */
+.login-btn {
+  background: #0d9488;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 18px;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.login-btn:hover {
+  background: #0f766e;
+}
+
+/* Error */
+.login-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+/* Footer */
+.login-footer {
+  font-size: 14px;
+  color: #5eada6;
+}
+
+.login-link {
+  color: #0d9488;
+  font-size: 18px;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+
+
+/* -------------------------------------------------register page ------------------------------------------------------------ */
+
+/* ══════════════════════════════════════════════════
+   IMS — Register Page Styles
+   File: src/pages/RegisterPage.css
+══════════════════════════════════════════════════ */
+
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 60%);
+  position: relative;
+}
+
+/* Decorative blobs */
+.register-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.register-blob.top {
+  top: -80px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background: rgba(13, 148, 136, 0.07);
+}
+
+.register-blob.bottom {
+  bottom: -60px;
+  left: -60px;
+  width: 240px;
+  height: 240px;
+  background: rgba(13, 148, 136, 0.05);
+}
+
+/* Card */
+.register-card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 16px;
+  padding: 8px;
+}
+
+/* Logo — exact match with .login-logo */
+.register-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+
+/* Title — exact match with .login-title */
+.register-title {
+  color: #134e4a;
+}
+
+/* Subtitle — exact match with .login-subtitle */
+.register-subtitle {
+  font-size: 18px;
+}
+
+/* Section label — register-only, not in login */
+.register-section-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0d9488;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e4f5f2;
+}
+
+/* Labels — exact match with .login-label */
+.register-label {
+  font-size: 18px;
+  color: #1f5f5b;
+}
+
+/* Inputs — exact match with .login-input */
+.register-input {
+  border-color: #99f6e4;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* Hint text — register-only */
+.register-hint {
+  font-size: 12px;
+  color: #5eada6;
+  margin-top: 4px;
+}
+
+/* Alerts — same style as .login-error */
+.register-alert {
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+.register-alert-icon {
+  flex-shrink: 0;
+}
+
+.register-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.register-alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* Button — exact match with .login-btn */
+.register-btn {
+  background: #0d9488;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 18px;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.register-btn:hover {
+  background: #0f766e;
+  color: #fff;
+}
+
+/* Footer — exact match with .login-footer */
+.register-footer {
+  font-size: 14px;
+  color: #5eada6;
+}
+
+/* Link — exact match with .login-link */
+.register-link {
+  color: #0d9488;
+  font-size: 18px;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+  color: #0d9488;
+}
