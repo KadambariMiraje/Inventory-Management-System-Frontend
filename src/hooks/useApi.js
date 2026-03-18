@@ -1,24 +1,44 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API = axios.create({
-  baseURL: "http://192.168.0.155:8083/api",
-});
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.155:8083/api';
 
-/* ===== INTERCEPTOR (IMPORTANT) ===== */
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+const api = axios.create({ baseURL: BASE_URL });
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
+// Attach JWT to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-/* ===== AUTH APIs ===== */
+// Auth
 export const authAPI = {
-  login: (data) => API.post("/user/login", data),
-  register: (data) => API.post("/user/signup", data),
+  register: (data) => api.post('/user/signup', data),
+  login:    (data) => api.post('/user/login',    data),
 };
 
-export default API;
+// Products
+export const productAPI = {
+  getAll:        ()       => api.get('/product'),
+  getById:       (id)     => api.get(`/product/${id}`),
+  addProduct:    (data)   => api.post('/product/addproduct', data),
+  update:        (id, d)  => api.put(`/product/${id}`, d),
+  getCategories: ()       => api.get('/product/getcategory'),
+  getByCategory: (cat)    => api.post(`/product/getproductname/${encodeURIComponent(cat)}`),
+  getLowStock:   ()       => api.get('/product/low-stock'),
+};
+ 
+// Batches / Purchase
+export const batchAPI = {
+  purchase:    (data) => api.post('/product/addbatch', data),
+  getExpiring: (days) => api.get(`/batches/expiring?days=${days || 30}`),
+  getExpired:  ()     => api.get('/batches/expired'),
+};
+
+// Transactions
+export const transactionAPI = {
+  getAll: (params) => api.get('/transactions', { params }),
+  sale:   (data)   => api.post('/sales', data),
+};
+
+export default api;
