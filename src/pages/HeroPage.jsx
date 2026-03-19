@@ -41,7 +41,7 @@ const FEATURES = [
 
 const WHY = [
   { icon: Zap,         title: 'Fast & Simple',   desc: 'Designed for small retailers — no complex setup, start managing in minutes.' },
-  { icon: ShieldCheck, title: 'Secure',           desc: 'JWT-based authentication keeps your store data safe and private.' },
+  { icon: ShieldCheck, title: 'Secure',           desc: 'Advanced security keeps your store data safe and private.' },
   { icon: BarChart3,   title: 'Always Accurate',  desc: 'Every transaction updates inventory instantly — no manual counting.' },
 ];
 

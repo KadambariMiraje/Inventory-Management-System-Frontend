@@ -68,10 +68,11 @@ export default function Sale() {
     setSubmitting(true);
     try {
       const payload = {
+        category : selectedCat,
         productName:  selectedProd,
         quantity:     parseInt(form.quantity),
-        customerName: form.customerName.trim(),
         interestRate:  parseFloat(form.interestRate),
+        customerName: form.customerName.trim(),
       };
       // TODO: update endpoint path when backend endpoints are shared
       const res = await transactionAPI.sale(payload);

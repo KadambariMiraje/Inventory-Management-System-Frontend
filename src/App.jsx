@@ -9,6 +9,10 @@ import AddProduct from "./components/modules/AddProducts";
 import Purchase from  "./components/modules/Purchase";
 import Sale from "./components/modules/Sale"
 import HeroPage from "./pages/HeroPage";
+import Inventory from "./components/modules/Inventory";
+import LowStock from "./components/modules/LowStock";
+import ExpiringItems from "./components/modules/ExpiringItems";
+import Transcations from "./components/modules/Transcations";
 
 function App() {
   return (
@@ -29,12 +33,12 @@ function App() {
               
               {/* Sub-routes: /dashboard/inventory, etc. */}
               <Route path="add-product" element={<AddProduct/>} />
-              <Route path="inventory" element={<div>Inventory Page</div>} />
+              <Route path="inventory" element={<Inventory/>} />
               <Route path="purchase" element={<Purchase/>} />
               <Route path="sale" element={<Sale/>} />
-              <Route path="low-stock" element={<div>Low Stock Page</div>} />
-              <Route path="expiring" element={<div>Expiring Items Page</div>} />
-              <Route path="transactions" element={<div>Transactions Page</div>} />
+              <Route path="low-stock" element={<LowStock/>} />
+              <Route path="expiring" element={<ExpiringItems/>} />
+              <Route path="transactions" element={<Transcations/>} />
             </Route>
 
             {/* Root Redirect */}

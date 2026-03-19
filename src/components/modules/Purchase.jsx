@@ -78,7 +78,7 @@ export default function Purchase() {
     setSubmitting(true);
     try {
       const payload = {
-        category : selectedProd,
+        category : selectedCat,
         productName:   selectedProd,
         batchNo:       form.batchNo.trim(),
         currQuantity:  parseInt(form.currQuantity),
