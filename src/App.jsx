@@ -21,17 +21,15 @@ function App() {
         <Navbar />
         <div className="min-h-screen bg-gray-50"> 
           <Routes>
-            {/* Auth Routes */}
+            
             <Route path="/" element={<HeroPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Dashboard Parent Route */}
+            
             <Route path="/dashboard" element={<DashboardLayout />}>
-              {/* index means this shows up at /dashboard */}
               <Route index element={<DashboardHome />} />
-              
-              {/* Sub-routes: /dashboard/inventory, etc. */}
+
               <Route path="add-product" element={<AddProduct/>} />
               <Route path="inventory" element={<Inventory/>} />
               <Route path="purchase" element={<Purchase/>} />
@@ -41,7 +39,7 @@ function App() {
               <Route path="transactions" element={<Transcations/>} />
             </Route>
 
-            {/* Root Redirect */}
+            
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

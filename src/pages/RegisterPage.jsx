@@ -40,11 +40,10 @@ export default function RegisterPage({ onGoLogin }) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white relative overflow-hidden px-4 py-10">
-      {/* Background Blobs */}
+     
       <div className="fixed -top-20 -right-20 w-48 h-48 md:w-72 md:h-72 bg-teal-600/[0.07] rounded-full pointer-events-none" />
       <div className="fixed -bottom-16 -left-16 w-40 h-40 md:w-60 md:h-60 bg-teal-600/[0.05] rounded-full pointer-events-none" />
 
-      {/* Main Card */}
       <div className="w-full max-w-[550px] bg-slate-50 rounded-3xl shadow-2xl border border-slate-200 p-6 md:p-10 z-10">
         <div className="text-center mb-8">
           <div className="inline-block p-1 bg-white rounded-full shadow-sm mb-4 border border-slate-100">
@@ -58,7 +57,7 @@ export default function RegisterPage({ onGoLogin }) {
         {error && <div className="bg-red-50 text-red-800 border border-red-200 rounded-xl px-4 py-3 text-sm mb-6 shadow-sm font-medium">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Use grid for better responsiveness */}
+        
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Username</label>

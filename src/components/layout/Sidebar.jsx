@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* HAMBURGER — sits in top-left, vertically centred in navbar (h-16/h-20) */}
+      
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed top-4 left-3 z-[200] p-2 bg-teal-600 text-white rounded-full shadow-lg active:scale-95 transition-transform"
@@ -37,7 +37,6 @@ export default function Sidebar() {
         {isOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
 
-      {/* BACKDROP */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] md:hidden"
@@ -45,23 +44,19 @@ export default function Sidebar() {
         />
       )}
 
-      {/* SIDEBAR
-          Navbar is sticky so sidebar uses fixed positioning starting from top-0.
-          On desktop it sits flush below the sticky navbar naturally via md:top-20.
-          On mobile it's full height with its own header matching navbar height. */}
       <aside className={`
         fixed left-0 top-0 bottom-0 z-[160] w-64 bg-slate-50 border-r border-slate-200
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:top-20
       `}>
-        {/* Mobile-only header — matches navbar h-16 */}
+        
         <div className="md:hidden h-16 bg-teal-700 flex items-center px-4 gap-3 flex-shrink-0">
           <img src="/logo.png" alt="IMS" className="w-8 h-8 rounded-full object-cover" />
           <span className="text-white font-bold text-sm tracking-widest uppercase">IMS Menu</span>
         </div>
 
-        {/* Nav items */}
+        
         <div className="overflow-y-auto py-4 px-3 space-y-1 h-[calc(100vh-4rem)]">
           {NAV_ITEMS.map((item) => {
             const Icon     = item.icon;

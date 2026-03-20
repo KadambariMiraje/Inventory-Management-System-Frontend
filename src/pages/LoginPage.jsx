@@ -35,14 +35,12 @@ export default function LoginPage({ onGoRegister }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white relative overflow-hidden px-4 py-8 sm:py-12">
 
-      {/* Background Blobs */}
+      
       <div className="fixed -top-20 -right-20 w-48 h-48 md:w-72 md:h-72 bg-teal-600/[0.07] rounded-full pointer-events-none" />
       <div className="fixed -bottom-16 -left-16 w-40 h-40 md:w-60 md:h-60 bg-teal-600/[0.05] rounded-full pointer-events-none" />
 
-      {/* Card */}
       <div className="w-full max-w-sm sm:max-w-md bg-slate-50 rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-8 md:p-10 z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-        {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-block p-1 bg-white rounded-full shadow-sm mb-3 sm:mb-4 border border-slate-100">
             <img src="/logo.png" alt="IMS" className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover" />
@@ -51,7 +49,6 @@ export default function LoginPage({ onGoRegister }) {
           <p className="text-sm md:text-base text-slate-500">Sign in to Inventory Management System</p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="flex items-center gap-2 bg-red-50 text-red-800 border border-red-200 rounded-xl px-4 py-3 text-sm mb-5 sm:mb-6 shadow-sm">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0">
@@ -61,7 +58,6 @@ export default function LoginPage({ onGoRegister }) {
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1 uppercase tracking-tight">
@@ -108,7 +104,6 @@ export default function LoginPage({ onGoRegister }) {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center mt-6 sm:mt-8 text-sm text-slate-500">
           Don't have an account?{' '}
           <button

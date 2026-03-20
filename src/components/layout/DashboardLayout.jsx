@@ -25,13 +25,13 @@ export default function DashboardLayout() {
 
       <main className="flex-1 md:ml-64 min-h-screen transition-all duration-300">
         <div className="p-4 sm:p-6 md:p-8 max-w-[1400px] mx-auto pb-20">
-          {/* Header */}
+    
           <header className="flex items-start justify-between gap-4 mb-6 sm:mb-8">
-            {/* Left — greeting + page title */}
+          
             <div>
               <p className="text-2xl sm:text-3xl font-bold text-slate-800 mb-0.5">
                 {greeting}
-                {firstName && `, ${firstName}`}
+                {`, ${firstName}`}
               </p>
 
               <h2 className="text-sm sm:text-base text-slate-500 capitalize tracking-tight">
@@ -40,7 +40,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          {/* Page content */}
+        
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200 p-4 sm:p-6 min-h-[65vh]">
             <Outlet />
           </div>

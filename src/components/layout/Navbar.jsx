@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 h-16 md:h-20 bg-white border-b border-teal-100 shadow-sm flex items-center justify-between px-4 md:px-16">
 
-      {/* Left spacer on mobile so brand clears the sidebar hamburger */}
+      
       <div className="w-10 flex-shrink-0 md:hidden" />
 
       <Link to="/" className="flex items-center gap-2 md:gap-3 no-underline group">
@@ -39,7 +39,7 @@ export default function Navbar() {
                 <div className="text-[11px] text-teal-400 font-medium capitalize">{user.storeName}</div>
               </div>
 
-              {/* Dropdown */}
+             
               <div className="absolute top-full right-0 mt-2 w-72 md:w-80 bg-white border border-teal-50 shadow-2xl rounded-2xl p-4 md:p-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right group-hover:translate-y-0 translate-y-4 z-[60]">
                 <div className="flex items-center gap-3 border-b border-gray-50 pb-3 mb-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 font-bold border border-teal-100">

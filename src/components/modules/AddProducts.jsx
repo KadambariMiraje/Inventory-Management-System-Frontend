@@ -25,7 +25,6 @@ export default function AddProduct() {
   const [msg, setMsg]             = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Custom category state
   const [isCustom, setIsCustom]       = useState(false);
   const [customInput, setCustomInput] = useState('');
 
