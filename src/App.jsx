@@ -13,6 +13,7 @@ import Inventory from "./components/modules/Inventory";
 import LowStock from "./components/modules/LowStock";
 import ExpiringItems from "./components/modules/ExpiringItems";
 import Transcations from "./components/modules/Transcations";
+import ProductHistory from "./pages/ProductHistory";
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
               <Route path="low-stock" element={<LowStock/>} />
               <Route path="expiring" element={<ExpiringItems/>} />
               <Route path="transactions" element={<Transcations/>} />
+              <Route path="inventory/history/:productCode" element={<ProductHistory />} />
+
             </Route>
 
             

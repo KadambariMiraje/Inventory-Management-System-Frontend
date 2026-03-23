@@ -10,11 +10,30 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// Auto logout when token expires (401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear stored credentials
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Redirect to login — works outside React components
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
  
 // Auth
 export const authAPI = {
   register: (data) => api.post('/user/signup', data),
   login:    (data) => api.post('/user/login', data),
+  sendOtp:       ()     => api.get('/user/sendotp'),
+  updateProfile:     (data) => api.post('/user/updateuser', data),
+  verifyPasswordOtp: (data) => api.post('/user/verifypasswordforotp', data),
+  updatePassword:    (data) => api.post('/user/updatepassword', data),
 };
 
 // Products
@@ -27,6 +46,8 @@ export const productAPI = {
   getByCategory:    (cat)        => api.post(`/product/getproductname/${encodeURIComponent(cat)}`),
   getLowStock:      ()           => api.get('/product/lowstockitems'),
   getAllWithBatches: ()           => api.get('/product/allproducts'),
+  getAllWithBatches: ()           => api.get('/product/allproducts'),
+  getProductUnit: (name)          => api.post(`/product/getunit/${encodeURIComponent(name)}`),
   editProduct:      (code, data) => api.put('/product/updateproduct', { productCode: code, ...data }),
   deleteProduct:    (code)       => api.delete(`/product/deleteproduct/${code}`),
 };

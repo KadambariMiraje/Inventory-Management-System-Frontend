@@ -20,18 +20,18 @@ export default function AuthProvider({ children }) {
       } catch {
         localStorage.removeItem("user");
       }
-    // } else {
-    // // 👇 TEMP DEV LOGIN
-    // if (process.env.NODE_ENV === "development") {
-    //   const fakeUser = { id: 1, name: "Dev User", role: "admin" };
-    //   const fakeToken = "dev-token";
+    } else {
+    // 👇 TEMP DEV LOGIN
+    if (process.env.NODE_ENV === "development") {
+      const fakeUser = { id: 1, name: "Dev User", role: "admin" };
+      const fakeToken = "dev-token";
 
-    //   localStorage.setItem("token", fakeToken);
-    //   localStorage.setItem("user", JSON.stringify(fakeUser));
+      localStorage.setItem("token", fakeToken);
+      localStorage.setItem("user", JSON.stringify(fakeUser));
 
-    //   setToken(fakeToken);
-    //   setUser(fakeUser);
-    // }
+      setToken(fakeToken);
+      setUser(fakeUser);
+    }
   }
 
     setLoading(false);
@@ -52,8 +52,14 @@ export default function AuthProvider({ children }) {
     
   };
 
+   const updateUser = (updatedFields) => {
+    const updated = { ...user, ...updatedFields };
+    localStorage.setItem('user', JSON.stringify(updated));
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

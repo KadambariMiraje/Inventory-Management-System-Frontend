@@ -17,27 +17,25 @@ const EMPTY_FORM = {
 
 export default function Purchase() {
   const { user, token, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const prefill   = location.state || {};
 
-  // Pre-fill values passed from LowStock restock button
-  const prefill = location.state || {};
-
-  const [categories, setCategories]     = useState([]);
-  const [products, setProducts]         = useState([]);
-  const [selectedCat, setSelectedCat]   = useState(prefill.category    || '');
+  const [categories,   setCategories]   = useState([]);
+  const [products,     setProducts]     = useState([]);
+  const [selectedCat,  setSelectedCat]  = useState(prefill.category    || '');
   const [selectedProd, setSelectedProd] = useState(prefill.productName || '');
+  const [productUnit,  setProductUnit]  = useState('');   // fetched from backend
+  const [loadingUnit,  setLoadingUnit]  = useState(false);
 
-  const [form, setForm]           = useState(EMPTY_FORM);
+  const [form,      setForm]      = useState(EMPTY_FORM);
   const [hasExpiry, setHasExpiry] = useState(false);
 
   const [loadingCats,  setLoadingCats]  = useState(false);
   const [loadingProds, setLoadingProds] = useState(false);
   const [submitting,   setSubmitting]   = useState(false);
   const [msg,          setMsg]          = useState(null);
-
-  // Track first load to preserve prefilled product after category fetch
-  const [firstLoad, setFirstLoad] = useState(true);
+  const [firstLoad,    setFirstLoad]    = useState(true);
 
   // Auth guard
   useEffect(() => {
@@ -55,16 +53,25 @@ export default function Purchase() {
   }, [authLoading, token]);
 
   // Fetch products when category changes
-  // On first load with prefill — keep selectedProd, don't reset it
   useEffect(() => {
-    if (!selectedCat) { setProducts([]); if (!firstLoad) setSelectedProd(''); return; }
+    if (!selectedCat) { setProducts([]); if (!firstLoad) { setSelectedProd(''); setProductUnit(''); } return; }
     setLoadingProds(true);
-    if (!firstLoad) setSelectedProd('');
+    if (!firstLoad) { setSelectedProd(''); setProductUnit(''); }
     productAPI.getByCategory(selectedCat)
       .then(res => { setProducts(res.data || []); setFirstLoad(false); })
       .catch(() => { setProducts([]); setFirstLoad(false); })
       .finally(() => setLoadingProds(false));
   }, [selectedCat]);
+
+  // Fetch unit when product is selected
+  useEffect(() => {
+    if (!selectedProd) { setProductUnit(''); return; }
+    setLoadingUnit(true);
+    productAPI.getProductUnit(selectedProd)
+      .then(res => setProductUnit(res.data || ''))
+      .catch(() => setProductUnit(''))
+      .finally(() => setLoadingUnit(false));
+  }, [selectedProd]);
 
   // Clear expiry date when checkbox unchecked
   useEffect(() => {
@@ -78,10 +85,9 @@ export default function Purchase() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(null);
-
-    if (!selectedCat)                  { setMsg({ type: 'error', text: 'Please select a category.' });    return; }
-    if (!selectedProd)                 { setMsg({ type: 'error', text: 'Please select a product.' });     return; }
-    if (hasExpiry && !form.expiryDate) { setMsg({ type: 'error', text: 'Please enter the expiry date.' }); return; }
+    if (!selectedCat)                   { setMsg({ type: 'error', text: 'Please select a category.' });    return; }
+    if (!selectedProd)                  { setMsg({ type: 'error', text: 'Please select a product.' });     return; }
+    if (hasExpiry && !form.expiryDate)  { setMsg({ type: 'error', text: 'Please enter the expiry date.' }); return; }
 
     setSubmitting(true);
     try {
@@ -89,7 +95,7 @@ export default function Purchase() {
         category:      selectedCat,
         productName:   selectedProd,
         batchNo:       form.batchNo.trim(),
-        currQuantity:  parseInt(form.currQuantity),
+        currQuantity:  parseFloat(form.currQuantity),
         purchasePrice: parseFloat(form.purchasePrice),
         partyName:     form.partyName.trim(),
         expiryDate:    hasExpiry ? form.expiryDate : null,
@@ -100,11 +106,14 @@ export default function Purchase() {
       setHasExpiry(false);
       setSelectedProd('');
       setSelectedCat('');
+      setProductUnit('');
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data || 'Purchase failed. Please try again.' });
-    } finally {
-      setSubmitting(false);
-    }
+      const errData = err.response?.data;
+      const errText = typeof errData === 'string'
+        ? errData
+        : errData?.message || 'Purchase failed. Please try again.';
+      setMsg({ type: 'error', text: errText });
+    } finally { setSubmitting(false); }
   };
 
   const inputCls  = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm placeholder:text-slate-300 disabled:opacity-60 disabled:cursor-not-allowed";
@@ -120,7 +129,14 @@ export default function Purchase() {
           <ShoppingBag size={20} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-           <h3 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Purchase Stock</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Purchase Stock</h3>
+            {prefill.productName && (
+              <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg">
+                Pre-filled from Low Stock
+              </span>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Add new batch stock for a product</p>
         </div>
       </div>
@@ -145,24 +161,17 @@ export default function Purchase() {
           {/* Step 1 — Select Product */}
           <div>
             
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
               {/* Category */}
               <div>
                 <label className={labelCls}>Category</label>
                 <div className="relative">
-                  <select
-                    className={selectCls}
-                    value={selectedCat}
+                  <select className={selectCls} value={selectedCat}
                     onChange={e => { setFirstLoad(false); setSelectedCat(e.target.value); }}
-                    required
-                    disabled={submitting || loadingCats}
-                  >
+                    required disabled={submitting || loadingCats}>
                     <option value="">{loadingCats ? 'Loading…' : 'Select category…'}</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                   <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -172,41 +181,45 @@ export default function Purchase() {
               <div>
                 <label className={labelCls}>Product Name</label>
                 <div className="relative">
-                  <select
-                    className={selectCls}
-                    value={selectedProd}
+                  <select className={selectCls} value={selectedProd}
                     onChange={e => setSelectedProd(e.target.value)}
-                    required
-                    disabled={submitting || !selectedCat || loadingProds}
-                  >
+                    required disabled={submitting || !selectedCat || loadingProds}>
                     <option value="">
-                      {!selectedCat
-                        ? 'Select category first…'
-                        : loadingProds
-                          ? 'Loading…'
-                          : products.length === 0
-                            ? 'No products found'
-                            : 'Select product…'}
+                      {!selectedCat ? 'Select category first…'
+                        : loadingProds ? 'Loading…'
+                        : products.length === 0 ? 'No products found'
+                        : 'Select product…'}
                     </option>
-                    {products.map(name => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
+                    {products.map(name => <option key={name} value={name}>{name}</option>)}
                   </select>
                   <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  {loadingProds && (
-                    <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-teal-500" />
-                  )}
+                  {loadingProds && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-teal-500" />}
                 </div>
               </div>
 
             </div>
+
+            {/* Unit display — shows after product is selected */}
+            {(selectedProd) && (
+              <div className="mt-3">
+                <label className={labelCls}>Default Unit</label>
+                <div className={`${inputCls} flex items-center gap-2 bg-slate-100 cursor-not-allowed`}>
+                  {loadingUnit ? (
+                    <><Loader2 size={14} className="animate-spin text-teal-500" /><span className="text-slate-400 text-sm">Fetching unit…</span></>
+                  ) : productUnit ? (
+                    <><span className="text-base font-bold text-teal-700">{productUnit}</span><span className="text-sm text-slate-400 ml-1">— all quantities in this unit</span></>
+                  ) : (
+                    <span className="text-slate-400 text-sm">No unit assigned to this product</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
          
-
           {/* Step 2 — Batch Details */}
           <div>
-           
+            
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
@@ -216,10 +229,14 @@ export default function Purchase() {
                   placeholder="e.g. BATCH-001" required disabled={submitting} />
               </div>
               <div>
-                <label className={labelCls}>Current Quantity</label>
+                <label className={labelCls}>
+                  Current Quantity
+                  {productUnit && <span className="ml-1 text-teal-600 normal-case font-semibold">({productUnit})</span>}
+                </label>
                 <input type="number" name="currQuantity" className={inputCls}
                   value={form.currQuantity} onChange={handleChange}
-                  placeholder="e.g. 100" min="1" required disabled={submitting} />
+                  placeholder={`e.g. 100${productUnit ? ` ${productUnit}` : ''}`}
+                  min="0.001" step="any" required disabled={submitting} />
               </div>
             </div>
 
@@ -235,8 +252,7 @@ export default function Purchase() {
               <label className={labelCls}>Party Name</label>
               <input type="text" name="partyName" className={inputCls}
                 value={form.partyName} onChange={handleChange}
-                placeholder="e.g. Supplier / Vendor name"
-                disabled={submitting} />
+                placeholder="e.g. Supplier / Vendor name" disabled={submitting} />
             </div>
 
             {/* Expiry checkbox */}
@@ -244,8 +260,7 @@ export default function Purchase() {
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div className="relative flex-shrink-0">
                   <input type="checkbox" className="sr-only"
-                    checked={hasExpiry}
-                    onChange={e => setHasExpiry(e.target.checked)}
+                    checked={hasExpiry} onChange={e => setHasExpiry(e.target.checked)}
                     disabled={submitting} />
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
                     hasExpiry ? 'bg-teal-600 border-teal-600' : 'bg-white border-slate-300'
@@ -262,14 +277,10 @@ export default function Purchase() {
                   <p className="text-xs text-slate-400 mt-0.5">Check this if the batch expires</p>
                 </div>
               </label>
-
               {hasExpiry && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <label className={labelCls}>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar size={12} />
-                      Expiry Date
-                    </span>
+                    <span className="flex items-center gap-1.5"><Calendar size={12} />Expiry Date</span>
                   </label>
                   <input type="date" name="expiryDate" className={inputCls}
                     value={form.expiryDate} onChange={handleChange}

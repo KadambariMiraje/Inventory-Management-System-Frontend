@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI } from '../../hooks/useApi';
-import { PackagePlus, ShoppingCart, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react';
+import { PackagePlus, ShoppingCart, CheckCircle, AlertCircle, Loader2, X, ChevronDown } from 'lucide-react';
 
 const EMPTY_FORM = {
   productCode:   '',
   productName:   '',
   category:      '',
   minStockLevel: '',
-  
+  defaultUnits:  '',
 };
 
 const DEFAULT_CATEGORIES = [
@@ -17,86 +17,67 @@ const DEFAULT_CATEGORIES = [
   'Clothing', 'Stationery', 'Grocery',
 ];
 
+const DEFAULT_UNITS = ['kg', 'litre', 'unit'];
+
 export default function AddProduct() {
   const { user, token, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm]           = useState(EMPTY_FORM);
-  const [msg, setMsg]             = useState(null);
+  const [form, setForm]             = useState(EMPTY_FORM);
+  const [msg, setMsg]               = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [isCustom, setIsCustom]       = useState(false);
-  const [customInput, setCustomInput] = useState('');
+  // Category state
+  const [isCustomCat, setIsCustomCat]   = useState(false);
+  const [customCat,   setCustomCat]     = useState('');
 
   useEffect(() => {
     if (!loading && (!user || !token)) navigate('/login');
   }, [user, token, loading, navigate]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 size={32} className="animate-spin text-teal-600" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 size={32} className="animate-spin text-teal-600" />
+    </div>
+  );
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // When dropdown changes
+  // Category handlers
   const handleCategorySelect = (e) => {
     const val = e.target.value;
     if (val === '__custom__') {
-      setIsCustom(true);
-      setForm({ ...form, category: '' });
-      setCustomInput('');
+      setIsCustomCat(true); setCustomCat(''); setForm({ ...form, category: '' });
     } else {
-      setIsCustom(false);
-      setForm({ ...form, category: val });
+      setIsCustomCat(false); setForm({ ...form, category: val });
     }
   };
-
-  // While typing custom category
-  const handleCustomInput = (e) => {
-    setCustomInput(e.target.value);
-    setForm({ ...form, category: e.target.value });
-  };
-
-  // Cancel custom — go back to dropdown
-  const cancelCustom = () => {
-    setIsCustom(false);
-    setCustomInput('');
-    setForm({ ...form, category: '' });
-  };
+  const handleCustomCat = (e) => { setCustomCat(e.target.value); setForm({ ...form, category: e.target.value }); };
+  const cancelCustomCat = () => { setIsCustomCat(false); setCustomCat(''); setForm({ ...form, category: '' }); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMsg(null);
-    setSubmitting(true);
+    setMsg(null); setSubmitting(true);
     try {
       const payload = {
         productCode:   form.productCode.trim(),
         productName:   form.productName.trim(),
         category:      form.category.trim(),
-        minStockLevel: parseInt(form.minStockLevel),
-        
+        minStockLevel: parseFloat(form.minStockLevel),
+        defaultUnits:  form.defaultUnits.trim(),
       };
       const res = await productAPI.addProduct(payload);
       setMsg({ type: 'success', text: res.data });
       setForm(EMPTY_FORM);
-      setIsCustom(false);
-      setCustomInput('');
+      setIsCustomCat(false); setCustomCat('');
     } catch (err) {
-      setMsg({
-        type: 'error',
-        text: err.response?.data || 'Failed to add product. Please try again.',
-      });
-    } finally {
-      setSubmitting(false);
-    }
+      setMsg({ type: 'error', text: typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to add product. Please try again.' });
+    } finally { setSubmitting(false); }
   };
 
-  const inputCls = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm placeholder:text-slate-300 disabled:opacity-60 disabled:cursor-not-allowed";
-  const labelCls = "block text-xs sm:text-sm font-bold text-slate-700 mb-1.5 ml-1 uppercase tracking-tight";
+  const inputCls  = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm placeholder:text-slate-300 disabled:opacity-60 disabled:cursor-not-allowed";
+  const labelCls  = "block text-xs sm:text-sm font-bold text-slate-700 mb-1.5 ml-1 uppercase tracking-tight";
+  const selectCls = inputCls + " appearance-none cursor-pointer";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -121,8 +102,7 @@ export default function AddProduct() {
         }`}>
           {msg.type === 'success'
             ? <CheckCircle size={18} className="flex-shrink-0 mt-0.5 text-teal-600" />
-            : <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-red-500" />
-          }
+            : <AlertCircle size={18} className="flex-shrink-0 mt-0.5 text-red-500" />}
           <span>{msg.text}</span>
         </div>
       )}
@@ -134,97 +114,79 @@ export default function AddProduct() {
           {/* Row 1 — Code + Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Product Code </label>
-              <input
-                type="text" name="productCode" className={inputCls}
+              <label className={labelCls}>Product Code</label>
+              <input type="text" name="productCode" className={inputCls}
                 value={form.productCode} onChange={handleChange}
-                placeholder="e.g. PROD-001" required disabled={submitting}
-              />
+                placeholder="e.g. PROD-001" required disabled={submitting} />
             </div>
             <div>
-              <label className={labelCls}>Product Name </label>
-              <input
-                type="text" name="productName" className={inputCls}
+              <label className={labelCls}>Product Name</label>
+              <input type="text" name="productName" className={inputCls}
                 value={form.productName} onChange={handleChange}
-                placeholder="e.g. Paracetamol 500mg" required disabled={submitting}
-              />
+                placeholder="e.g. Paracetamol 500mg" required disabled={submitting} />
             </div>
           </div>
 
           {/* Row 2 — Category */}
           <div>
-            <label className={labelCls}>Category </label>
-
-            {!isCustom ? (
-              /* Normal dropdown */
-              <select
-                className={inputCls}
-                value={form.category}
-                onChange={handleCategorySelect}
-                required
-                disabled={submitting}
-              >
-                <option value="">Select a category…</option>
-                {DEFAULT_CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-                <option value="__custom__">+ Add custom category…</option>
-              </select>
+            <label className={labelCls}>Category</label>
+            {!isCustomCat ? (
+              <div className="relative">
+                <select className={selectCls} value={form.category}
+                  onChange={handleCategorySelect} required disabled={submitting}>
+                  <option value="">Select a category…</option>
+                  {DEFAULT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="__custom__">+ Add custom category…</option>
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
             ) : (
-              /* Custom text input */
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  className={inputCls}
-                  value={customInput}
-                  onChange={handleCustomInput}
-                  placeholder="Type your custom category…"
-                  required
-                  autoFocus
-                  disabled={submitting}
-                />
-                <button
-                  type="button"
-                  onClick={cancelCustom}
-                  className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-400 hover:text-red-500 hover:border-red-300 transition-all"
-                  title="Back to dropdown"
-                >
+                <input type="text" className={inputCls} value={customCat}
+                  onChange={handleCustomCat} placeholder="Type your custom category…"
+                  required autoFocus disabled={submitting} />
+                <button type="button" onClick={cancelCustomCat}
+                  className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-400 hover:text-red-500 hover:border-red-300 transition-all">
                   <X size={16} />
                 </button>
               </div>
             )}
           </div>
-          {/* Row 3 — Min Stock + Interest Rate */}
-          <div className="grid gap-4">
+
+          {/* Row 3 — Min Stock + Default Unit */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Min Stock Level </label>
-              <input
-                type="number" name="minStockLevel" className={inputCls}
+              <label className={labelCls}>Min Stock Level</label>
+              <input type="number" name="minStockLevel" className={inputCls}
                 value={form.minStockLevel} onChange={handleChange}
-                placeholder="e.g. 10" min="0" required disabled={submitting}
-              />
+                placeholder="e.g. 10" min="0" required disabled={submitting} />
             </div>
-            
+            <div>
+              <label className={labelCls}>Default Unit</label>
+              <div className="relative">
+                <select className={selectCls} name="defaultUnits" value={form.defaultUnits}
+                  onChange={handleChange} required disabled={submitting}>
+                  <option value="">Select a unit…</option>
+                  {DEFAULT_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+              {/* <p className="text-xs text-slate-400 mt-1.5 ml-1">
+                All batches for this product will use this unit.
+              </p> */}
+            </div>
           </div>
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button
-              type="submit" disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {submitting ? (
-                <><Loader2 size={18} className="animate-spin" />Adding…</>
-              ) : (
-                <><PackagePlus size={18} />Add Product</>
-              )}
+            <button type="submit" disabled={submitting}
+              className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
+              {submitting
+                ? <><Loader2 size={18} className="animate-spin" />Adding…</>
+                : <><PackagePlus size={18} />Add Product</>}
             </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard/purchase')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-teal-600 font-bold border-2 border-teal-600 rounded-xl py-3 sm:py-3.5 px-5 text-sm sm:text-base transition-all active:scale-[0.98]"
-            >
+            <button type="button" onClick={() => navigate('/dashboard/purchase')}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-teal-600 font-bold border-2 border-teal-600 rounded-xl py-3 sm:py-3.5 px-5 text-sm sm:text-base transition-all active:scale-[0.98]">
               <ShoppingCart size={18} />
               Go to Purchase
             </button>

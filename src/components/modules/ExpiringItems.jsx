@@ -79,7 +79,7 @@ export default function ExpiringItems() {
 
   const thCls = "px-4 py-3 text-left text-sm font-bold text-white uppercase tracking-wide whitespace-nowrap";
 
-  const expiredCount  = allItems.filter(b => daysUntilExpiry(b.expiryDate) <= 0).length;
+  const expiredCount  = allItems.filter(b => daysUntilExpiry(b.expiryDate) < 0).length;
   const criticalCount = allItems.filter(b => { const d = daysUntilExpiry(b.expiryDate); return d !== null && d >= 0 && d <= 7; }).length;
 
   return (
@@ -187,7 +187,7 @@ export default function ExpiringItems() {
                     {d !== null && <StatusBadge days={d} />}
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                    <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-800">{batch.currentQuantity} units</span></div>
+                    <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-800">{batch.currentQuantity} {batch.defaultUnits || 'units'}</span></div>
                     <div><span className="text-slate-400">Code: </span><span className="font-mono font-semibold text-slate-700">{batch.productCode}</span></div>
                     <div className="col-span-2">
                       <span className="text-slate-400">Expiry: </span>
@@ -233,7 +233,7 @@ export default function ExpiringItems() {
                         <td className="px-4 py-3"><span className="font-mono text-sm font-semibold text-slate-600">{batch.productCode}</span></td>
                         <td className="px-4 py-3">
                           <span className="text-base font-semibold text-slate-800">{batch.currentQuantity}</span>
-                          <span className="text-sm text-slate-500 ml-1">units</span>
+                          <span className="text-sm text-slate-500 ml-1">{batch.defaultUnits || 'units'}</span>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-sm font-semibold ${isExpired ? 'text-red-600' : isCritical ? 'text-amber-700' : 'text-slate-700'}`}>

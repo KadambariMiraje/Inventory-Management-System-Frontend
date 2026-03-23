@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { productAPI, batchAPI } from '../../hooks/useApi';
 import {
   Search, Pencil, Trash2, ChevronDown, ChevronRight,
-  Loader2, CheckCircle, AlertCircle, X, Package, RefreshCw,
+  Loader2, CheckCircle, AlertCircle, X, Package, RefreshCw, History,
 } from 'lucide-react';
 
 const DEFAULT_CATEGORIES = [
@@ -76,7 +76,7 @@ function EditProductModal({ product, onSave, onClose }) {
         minStockLevel: parseInt(form.minStockLevel),
       });
       onSave();
-    } catch (err) { setErr(err.response?.data || 'Failed to update product.'); }
+    } catch (err) { setErr(typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to update product.'); }
     finally { setSaving(false); }
   };
 
@@ -122,7 +122,7 @@ function EditProductModal({ product, onSave, onClose }) {
                 </button>
               </div>
             )}
-            
+            {!isCustom && <p className="text-xs text-slate-400 mt-1.5 ml-1">Don't see your category? Choose <span className="font-semibold text-teal-600">+ Add custom category</span>.</p>}
           </div>
           <div>
             <label className={labelCls}>Min Stock Level</label>
@@ -168,7 +168,7 @@ function EditBatchModal({ batch, onSave, onClose }) {
         expiryDate:      form.expiryDate || null,
       });
       onSave();
-    } catch (err) { setErr(err.response?.data || 'Failed to update batch.'); }
+    } catch (err) { setErr(typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to update batch.'); }
     finally { setSaving(false); }
   };
 
@@ -277,7 +277,7 @@ export default function Inventory() {
       onConfirm: async () => {
         setConfirm(null);
         try { await productAPI.deleteProduct(product.productCode); showMsg('success', `"${product.productName}" deleted.`); fetchProducts(); }
-        catch (err) { showMsg('error', err.response?.data || 'Failed to delete product.'); }
+        catch (err) { showMsg('error', typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to delete product.'); }
       },
     });
   };
@@ -288,7 +288,7 @@ export default function Inventory() {
       onConfirm: async () => {
         setConfirm(null);
         try { await batchAPI.deleteBatch(batch.id); showMsg('success', `Batch "${batch.batchNumber}" deleted.`); fetchProducts(); }
-        catch (err) { showMsg('error', err.response?.data || 'Failed to delete batch.'); }
+        catch (err) { showMsg('error', typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to delete batch.'); }
       },
     });
   };
@@ -373,6 +373,7 @@ export default function Inventory() {
                       <span className="font-mono text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{product.productCode}</span>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="View history"><History size={15} /></button>
                       <button onClick={() => setEditProduct(product)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors"><Pencil size={15} /></button>
                       <button onClick={() => handleDeleteProduct(product)} className="p-2 rounded-xl hover:bg-red-100 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={15} /></button>
                     </div>
@@ -388,6 +389,7 @@ export default function Inventory() {
                       <p className="text-xs text-slate-400 mb-0.5">Stock</p>
                       <div className="flex items-center gap-1.5">
                         <span className={`text-base font-bold ${isLow ? 'text-red-600' : 'text-slate-800'}`}>{totalQty}</span>
+                        {product.defaultUnits && <span className="text-xs text-slate-500">{product.defaultUnits}</span>}
                         {isLow && <span className="text-xs bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-md">LOW</span>}
                       </div>
                     </div>
@@ -425,7 +427,7 @@ export default function Inventory() {
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
-                                  <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-700">{batch.currentQuantity} units</span></div>
+                                  <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-700">{batch.currentQuantity} {product.defaultUnits || 'units'}</span></div>
                                   <div><span className="text-slate-400">Price: </span><span className="font-semibold text-slate-700">₹{batch.purchasePrice?.toFixed(2)}</span></div>
                                   <div className="col-span-2">
                                     <span className="text-slate-400">Expiry: </span>
@@ -481,6 +483,7 @@ export default function Inventory() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <span className={`text-base font-bold ${isLow ? 'text-red-600' : 'text-slate-800'}`}>{totalQty}</span>
+                              {product.defaultUnits && <span className="text-sm text-slate-500">{product.defaultUnits}</span>}
                               {isLow && <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-md">LOW</span>}
                             </div>
                           </td>
@@ -488,6 +491,7 @@ export default function Inventory() {
                           <td className="px-4 py-3"><span className="text-base font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</span></td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1.5">
+                              <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="View history"><History size={16} /></button>
                               <button onClick={() => setEditProduct(product)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit"><Pencil size={16} /></button>
                               <button onClick={() => handleDeleteProduct(product)} className="p-2 rounded-xl hover:bg-red-100 text-slate-500 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
                             </div>
@@ -522,7 +526,7 @@ export default function Inventory() {
                                           <tr key={batch.id ?? batch.batchNumber}
                                             className={`${isExpired ? 'bg-red-50' : bi % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-teal-50 transition-colors`}>
                                             <td className="px-4 py-3"><span className="font-mono text-sm font-bold text-teal-700">{batch.batchNumber}</span></td>
-                                            <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{batch.currentQuantity}</span><span className="text-sm text-slate-500 ml-1">units</span></td>
+                                            <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{batch.currentQuantity}</span><span className="text-sm text-slate-500 ml-1">{product.defaultUnits || 'units'}</span></td>
                                             <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">₹{batch.purchasePrice?.toFixed(2)}</span></td>
                                             <td className="px-4 py-3">
                                               {batch.expiryDate ? (

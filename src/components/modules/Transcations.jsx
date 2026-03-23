@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { transactionAPI } from '../../hooks/useApi';
 import {
   IndianRupee, RefreshCw, Search, Loader2,
-  X, AlertTriangle, TrendingUp, TrendingDown, Filter, Download,
+  X, AlertTriangle, TrendingUp, TrendingDown, Filter, Download, Calendar,
 } from 'lucide-react';
 
 export default function Transactions() {
@@ -15,6 +15,8 @@ export default function Transactions() {
   const [filtered,     setFiltered]     = useState([]);
   const [search,       setSearch]       = useState('');
   const [typeFilter,   setTypeFilter]   = useState('ALL');
+  const [dateFrom,     setDateFrom]     = useState('');
+  const [dateTo,       setDateTo]       = useState('');
   const [fetching,     setFetching]     = useState(true);
   const [error,        setError]        = useState('');
   const [downloading,  setDownloading]  = useState(false);
@@ -40,7 +42,23 @@ export default function Transactions() {
 
   useEffect(() => {
     let result = [...transactions];
+
+    // Type filter
     if (typeFilter !== 'ALL') result = result.filter(t => t.type === typeFilter);
+
+    // Date range filter
+    if (dateFrom) {
+      const from = new Date(dateFrom);
+      from.setHours(0, 0, 0, 0);
+      result = result.filter(t => t.transactionDate && new Date(t.transactionDate) >= from);
+    }
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      result = result.filter(t => t.transactionDate && new Date(t.transactionDate) <= to);
+    }
+
+    // Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(t =>
@@ -50,8 +68,12 @@ export default function Transactions() {
         t.partyName?.toLowerCase().includes(q)
       );
     }
+
     setFiltered(result);
-  }, [search, typeFilter, transactions]);
+  }, [search, typeFilter, dateFrom, dateTo, transactions]);
+
+  const clearDateRange = () => { setDateFrom(''); setDateTo(''); };
+  const hasDateFilter  = dateFrom || dateTo;
 
   // ── PDF Download ──────────────────────────────────────────────
   const downloadPDF = () => {
@@ -127,7 +149,7 @@ export default function Transactions() {
             txn.productName || '—',
             txn.productCode  || '—',
             txn.category     || '—',
-            String(txn.quantity || 0),
+            String(txn.quantity || 0) + (txn.defaultUnits ? ' ' + txn.defaultUnits : ''),
             txn.totalAmount != null ? txn.totalAmount.toFixed(2) : '0.00',
             txn.partyName    || '—',
             date ? date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
@@ -237,14 +259,14 @@ export default function Transactions() {
           </div>
           <div className="bg-teal-50 border border-teal-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center gap-1.5 mb-1">
-              {/* <TrendingDown size={13} className="text-teal-600" /> */}
+              <TrendingDown size={13} className="text-teal-600" />
               <p className="text-xs font-bold text-teal-600 uppercase tracking-wide">Purchases</p>
             </div>
             <p className="text-2xl font-bold text-teal-700">{totalPurchases}</p>
           </div>
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 shadow-sm col-span-2 sm:col-span-1">
             <div className="flex items-center gap-1.5 mb-1">
-              {/* <TrendingUp size={13} className="text-green-600" /> */}
+              <TrendingUp size={13} className="text-green-600" />
               <p className="text-xs font-bold text-green-600 uppercase tracking-wide">Sales</p>
             </div>
             <p className="text-2xl font-bold text-green-700">{totalSales}</p>
@@ -253,32 +275,71 @@ export default function Transactions() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by product, code, category or party…"
-            className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-11 py-3.5 text-base text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm"
-          />
-          {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={16} /></button>}
-        </div>
-        <div className="flex items-center gap-2">
-          <Filter size={16} className="text-slate-400 flex-shrink-0" />
-          <div className="flex bg-slate-100 rounded-xl p-1">
-            {['ALL', 'PURCHASE', 'SALE'].map(type => (
-              <button key={type} onClick={() => setTypeFilter(type)}
-                className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                  typeFilter === type
-                    ? type === 'SALE' ? 'bg-green-500 text-white shadow-sm'
-                    : type === 'PURCHASE' ? 'bg-teal-600 text-white shadow-sm'
-                    : 'bg-slate-700 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}>
-                {type === 'ALL' ? 'All' : type === 'PURCHASE' ? 'Purchases' : 'Sales'}
-              </button>
-            ))}
+      <div className="flex flex-col gap-3 mb-5">
+
+        {/* Row 1 — Search + Type */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search by product, code, category or party…"
+              className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-11 py-3.5 text-base text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm"
+            />
+            {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={16} /></button>}
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-slate-400 flex-shrink-0" />
+            <div className="flex bg-slate-100 rounded-xl p-1">
+              {['ALL', 'PURCHASE', 'SALE'].map(type => (
+                <button key={type} onClick={() => setTypeFilter(type)}
+                  className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    typeFilter === type
+                      ? type === 'SALE' ? 'bg-green-500 text-white shadow-sm'
+                      : type === 'PURCHASE' ? 'bg-teal-600 text-white shadow-sm'
+                      : 'bg-slate-700 text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}>
+                  {type === 'ALL' ? 'All' : type === 'PURCHASE' ? 'Purchases' : 'Sales'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Row 2 — Date range */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Calendar size={16} className="text-slate-400" />
+            <span className="text-sm font-bold text-slate-600">Date Range</span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs text-slate-400 font-semibold w-6">From</span>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                max={dateTo || undefined}
+                className="flex-1 sm:flex-none bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm" />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs text-slate-400 font-semibold w-6">To</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                min={dateFrom || undefined}
+                className="flex-1 sm:flex-none bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm" />
+            </div>
+            {hasDateFilter && (
+              <button onClick={clearDateRange}
+                className="flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap">
+                <X size={14} />
+                Clear dates
+              </button>
+            )}
+            {hasDateFilter && (
+              <span className="text-xs text-teal-600 font-semibold bg-teal-50 px-3 py-2.5 rounded-xl whitespace-nowrap">
+                {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        </div>
+
       </div>
 
       {/* Content */}
@@ -290,7 +351,7 @@ export default function Transactions() {
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
           <IndianRupee size={40} className="mx-auto mb-3 text-slate-300" />
           <p className="font-bold text-base text-slate-600">
-            {search || typeFilter !== 'ALL' ? 'No transactions match your filter.' : 'No transactions yet.'}
+            {search || typeFilter !== 'ALL' || hasDateFilter ? 'No transactions match your filter.' : 'No transactions yet.'}
           </p>
           <p className="text-sm text-slate-400 mt-1">
             {!search && typeFilter === 'ALL' && 'Transactions will appear here once you record a purchase or sale.'}
@@ -313,12 +374,12 @@ export default function Transactions() {
                     <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl flex-shrink-0 ${
                       isSale ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'
                     }`}>
-                      {/* {isSale ? <TrendingUp size={12} /> : <TrendingDown size={12} />} */}
+                      {isSale ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                       {txn.type}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-800">{txn.quantity} units</span></div>
+                    <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-800">{txn.quantity} {txn.defaultUnits || 'units'}</span></div>
                     <div><span className="text-slate-400">Amount: </span><span className="font-semibold text-slate-800">₹{txn.totalAmount?.toFixed(2) ?? '0.00'}</span></div>
                     <div><span className="text-slate-400">Category: </span><span className="font-semibold text-slate-700">{txn.category || '—'}</span></div>
                     <div><span className="text-slate-400">Party: </span><span className="font-semibold text-slate-700">{txn.partyName || '—'}</span></div>
@@ -359,14 +420,14 @@ export default function Transactions() {
                         <td className="px-4 py-3"><span className="text-sm font-semibold text-slate-500">{idx + 1}</span></td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-xl ${isSale ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'}`}>
-                            {/* {isSale ? <TrendingUp size={13} /> : <TrendingDown size={13} />} */}
+                            {isSale ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
                             {txn.type}
                           </span>
                         </td>
                         <td className="px-4 py-3"><span className="text-base font-bold text-slate-800">{txn.productName || '—'}</span></td>
                         <td className="px-4 py-3"><span className="font-mono text-sm font-semibold text-teal-700 bg-teal-50 px-2 py-1 rounded-lg">{txn.productCode || '—'}</span></td>
                         <td className="px-4 py-3"><span className="text-sm font-semibold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg">{txn.category || '—'}</span></td>
-                        <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{txn.quantity}</span><span className="text-sm text-slate-500 ml-1">units</span></td>
+                        <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{txn.quantity}</span><span className="text-sm text-slate-500 ml-1">{txn.defaultUnits || 'units'}</span></td>
                         <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">₹{txn.totalAmount?.toFixed(2) ?? '0.00'}</span></td>
                         <td className="px-4 py-3"><span className="text-base text-slate-700">{txn.partyName || '—'}</span></td>
                         <td className="px-4 py-3"><span className="text-sm font-semibold text-slate-700">{formatDate(txn.transactionDate)}</span></td>
