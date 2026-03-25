@@ -296,7 +296,7 @@ function UpdatePasswordModal({ onClose }) {
                 <label className={labelCls}>Enter OTP</label>
                 <div className="relative">
                   <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input className={inputCls + " pl-10 text-center tracking-[0.5em] text-xl font-bold"} value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="• • • • • •" required autoFocus />
+                  <input className={inputCls + " pl-10 text-center tracking-[0.5em] text-xl font-bold"} value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="• • • • " required autoFocus />
                 </div>
               </div>
               <div className="flex gap-3 pt-2">

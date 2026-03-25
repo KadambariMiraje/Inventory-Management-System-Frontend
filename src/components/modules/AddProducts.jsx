@@ -27,7 +27,6 @@ export default function AddProduct() {
   const [msg, setMsg]               = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Category state
   const [isCustomCat, setIsCustomCat]   = useState(false);
   const [customCat,   setCustomCat]     = useState('');
 
@@ -43,7 +42,6 @@ export default function AddProduct() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Category handlers
   const handleCategorySelect = (e) => {
     const val = e.target.value;
     if (val === '__custom__') {
@@ -82,7 +80,6 @@ export default function AddProduct() {
   return (
     <div className="max-w-2xl mx-auto">
 
-      {/* Heading */}
       <div className="flex items-center gap-3 mb-6 sm:mb-8">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
           <PackagePlus size={20} className="text-white" />
@@ -93,7 +90,6 @@ export default function AddProduct() {
         </div>
       </div>
 
-      {/* Alert */}
       {msg && (
         <div className={`flex items-start gap-3 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 mb-6 text-sm font-medium shadow-sm ${
           msg.type === 'success'
@@ -107,11 +103,9 @@ export default function AddProduct() {
         </div>
       )}
 
-      {/* Form card */}
       <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
-          {/* Row 1 — Code + Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Product Code</label>
@@ -127,7 +121,6 @@ export default function AddProduct() {
             </div>
           </div>
 
-          {/* Row 2 — Category */}
           <div>
             <label className={labelCls}>Category</label>
             {!isCustomCat ? (
@@ -153,7 +146,6 @@ export default function AddProduct() {
             )}
           </div>
 
-          {/* Row 3 — Min Stock + Default Unit */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Min Stock Level</label>
@@ -171,13 +163,9 @@ export default function AddProduct() {
                 </select>
                 <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
-              {/* <p className="text-xs text-slate-400 mt-1.5 ml-1">
-                All batches for this product will use this unit.
-              </p> */}
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button type="submit" disabled={submitting}
               className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">

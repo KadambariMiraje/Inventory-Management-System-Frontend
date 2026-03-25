@@ -43,10 +43,8 @@ export default function Transactions() {
   useEffect(() => {
     let result = [...transactions];
 
-    // Type filter
     if (typeFilter !== 'ALL') result = result.filter(t => t.type === typeFilter);
 
-    // Date range filter
     if (dateFrom) {
       const from = new Date(dateFrom);
       from.setHours(0, 0, 0, 0);
@@ -58,7 +56,6 @@ export default function Transactions() {
       result = result.filter(t => t.transactionDate && new Date(t.transactionDate) <= to);
     }
 
-    // Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(t =>
@@ -75,122 +72,93 @@ export default function Transactions() {
   const clearDateRange = () => { setDateFrom(''); setDateTo(''); };
   const hasDateFilter  = dateFrom || dateTo;
 
-  // ── PDF Download ──────────────────────────────────────────────
-  const downloadPDF = () => {
+  // ── XLSX Download ─────────────────────────────────────────────
+  const downloadXLSX = () => {
     setDownloading(true);
 
     const generate = () => {
       try {
-        // UMD build exposes window.jspdf.jsPDF
-        const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
-        if (!jsPDF) throw new Error('jsPDF not loaded');
-        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-        const pageW  = doc.internal.pageSize.getWidth();
-        const margin = 14;
-        let y = margin;
+        const XLSX = window.XLSX;
+        if (!XLSX) throw new Error('SheetJS not loaded');
 
-        // Header
-        doc.setFillColor(13, 148, 136);
-        doc.rect(0, 0, pageW, 18, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(13); doc.setFont('helvetica', 'bold');
-        doc.text('IMS — Transaction Report', margin, 11);
-        doc.setFontSize(9); doc.setFont('helvetica', 'normal');
-        doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, pageW - margin, 11, { align: 'right' });
-        if (user?.storeName) doc.text(`Store: ${user.storeName}`, margin, 16);
-        y = 26;
+        const formatDate = (dateStr) => {
+          if (!dateStr) return '—';
+          return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        };
+        const formatTime = (dateStr) => {
+          if (!dateStr) return '—';
+          return new Date(dateStr).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        };
 
-        // Summary
+        // Build rows
+        const headers = ['#', 'Type', 'Product', 'Code', 'Category', 'Quantity', 'Units', 'Amount (₹)', 'Party', 'Date', 'Time'];
+
+        const rows = filtered.map((txn, idx) => [
+          idx + 1,
+          txn.type || '—',
+          txn.productName || '—',
+          txn.productCode  || '—',
+          txn.category     || '—',
+          txn.quantity     ?? 0,
+          txn.defaultUnits || 'units',
+          txn.totalAmount  != null ? parseFloat(txn.totalAmount.toFixed(2)) : 0,
+          txn.partyName    || '—',
+          formatDate(txn.transactionDate),
+          formatTime(txn.transactionDate),
+        ]);
+
+        // Summary rows at top
         const tSales     = filtered.filter(t => t.type === 'SALE').length;
         const tPurchases = filtered.filter(t => t.type === 'PURCHASE').length;
         const tAmt       = filtered.reduce((s, t) => s + (t.totalAmount || 0), 0);
-        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
-        doc.text(`Total: ${filtered.length}   |   Purchases: ${tPurchases}   |   Sales: ${tSales}   |   Total Amount: ₹${tAmt.toFixed(2)}`, margin, y);
-        y += 8;
 
-        // Table columns
-        const cols = [
-          { label: '#',          w: 10 },
-          { label: 'Type',       w: 22 },
-          { label: 'Product',    w: 42 },
-          { label: 'Code',       w: 24 },
-          { label: 'Category',   w: 26 },
-          { label: 'Qty',        w: 14 },
-          { label: 'Amount(₹)',  w: 26 },
-          { label: 'Party',      w: 34 },
-          { label: 'Date',       w: 27 },
-          { label: 'Time',       w: 20 },
+        const summaryRows = [
+          ['IMS — Transaction Report'],
+          [`Store: ${user?.storeName || '—'}`],
+          [`Generated: ${new Date().toLocaleString('en-IN')}`],
+          [],
+          ['Total Transactions', filtered.length, '', 'Purchases', tPurchases, '', 'Sales', tSales, '', 'Total Amount (₹)', parseFloat(tAmt.toFixed(2))],
+          [],
+          headers,
+          ...rows,
         ];
 
-        const drawHeader = () => {
-          doc.setFillColor(13, 148, 136);
-          doc.rect(margin, y, pageW - margin * 2, 7, 'F');
-          doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
-          let x = margin + 1;
-          cols.forEach(col => { doc.text(col.label, x, y + 4.8); x += col.w; });
-          y += 7;
-          doc.setFont('helvetica', 'normal');
-        };
+        const ws = XLSX.utils.aoa_to_sheet(summaryRows);
 
-        drawHeader();
+        // Column widths
+        ws['!cols'] = [
+          { wch: 4  },  // #
+          { wch: 12 },  // Type
+          { wch: 30 },  // Product
+          { wch: 14 },  // Code
+          { wch: 16 },  // Category
+          { wch: 10 },  // Quantity
+          { wch: 8  },  // Units
+          { wch: 14 },  // Amount
+          { wch: 20 },  // Party
+          { wch: 16 },  // Date
+          { wch: 10 },  // Time
+        ];
 
-        filtered.forEach((txn, idx) => {
-          if (y > 185) { doc.addPage(); y = margin; drawHeader(); }
-
-          if (idx % 2 === 0) {
-            doc.setFillColor(248, 255, 254);
-            doc.rect(margin, y, pageW - margin * 2, 6.5, 'F');
-          }
-
-          const date = txn.transactionDate ? new Date(txn.transactionDate) : null;
-          const row  = [
-            String(idx + 1),
-            txn.type || '—',
-            txn.productName || '—',
-            txn.productCode  || '—',
-            txn.category     || '—',
-            String(txn.quantity || 0) + (txn.defaultUnits ? ' ' + txn.defaultUnits : ''),
-            txn.totalAmount != null ? txn.totalAmount.toFixed(2) : '0.00',
-            txn.partyName    || '—',
-            date ? date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
-            date ? date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—',
-          ];
-
-          let x = margin + 1;
-          cols.forEach((col, ci) => {
-            if (ci === 1) {
-              doc.setTextColor(row[1] === 'SALE' ? 22 : 13, row[1] === 'SALE' ? 163 : 148, row[1] === 'SALE' ? 74 : 136);
-            } else {
-              doc.setTextColor(30, 41, 59);
-            }
-            doc.text(String(row[ci]).slice(0, 30), x, y + 4.2);
-            x += col.w;
-          });
-
-          doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.1);
-          doc.line(margin, y + 6.5, pageW - margin, y + 6.5);
-          y += 6.5;
-        });
-
-        doc.setFontSize(8); doc.setTextColor(148, 163, 184);
-        doc.text('© IMS Portal — Secure Inventory Management', pageW / 2, y + 8, { align: 'center' });
-        doc.save(`IMS_Transactions_${new Date().toISOString().slice(0, 10)}.pdf`);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+        XLSX.writeFile(wb, `IMS_Transactions_${new Date().toISOString().slice(0, 10)}.xlsx`);
       } catch (err) {
-        console.error('PDF error:', err);
-        alert('Failed to generate PDF.');
+        console.error('XLSX error:', err);
+        alert('Failed to generate Excel file.');
       } finally {
         setDownloading(false);
       }
     };
 
-    // Load jsPDF script once, then generate
-    if (window.jspdf?.jsPDF || window.jsPDF) {
+    // Load SheetJS once, then generate
+    if (window.XLSX) {
       generate();
     } else {
       const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
       script.onload  = generate;
-      script.onerror = () => { alert('Could not load PDF library.'); setDownloading(false); };
+      script.onerror = () => { alert('Could not load Excel library.'); setDownloading(false); };
       document.head.appendChild(script);
     }
   };
@@ -226,13 +194,13 @@ export default function Transactions() {
           </div>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          {/* Download PDF */}
-          <button onClick={downloadPDF} disabled={downloading || fetching || filtered.length === 0}
+          {/* Download XLSX */}
+          <button onClick={downloadXLSX} disabled={downloading || fetching || filtered.length === 0}
             className="flex items-center gap-2 text-base font-semibold text-teal-600 border-2 border-teal-200 hover:border-teal-400 bg-teal-50 hover:bg-teal-100 px-4 py-2.5 rounded-xl transition-all disabled:opacity-50">
             {downloading
               ? <Loader2 size={16} className="animate-spin" />
               : <Download size={16} />}
-            <span className="hidden sm:inline">Download PDF</span>
+            <span className="hidden sm:inline">Download Excel</span>
           </button>
           {/* Refresh */}
           <button onClick={fetchTransactions} disabled={fetching}
@@ -368,7 +336,7 @@ export default function Transactions() {
                   className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-4 ${idx % 2 !== 0 ? 'bg-slate-50' : ''}`}>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-slate-800 truncate">{txn.productName || '—'}</p>
+                      <p className="text-base font-bold text-slate-800 truncate">{txn.productName || <span className="text-slate-400 italic text-sm">Deleted product</span>}</p>
                       <span className="font-mono text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{txn.productCode || '—'}</span>
                     </div>
                     <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl flex-shrink-0 ${
@@ -424,7 +392,7 @@ export default function Transactions() {
                             {txn.type}
                           </span>
                         </td>
-                        <td className="px-4 py-3"><span className="text-base font-bold text-slate-800">{txn.productName || '—'}</span></td>
+                        <td className="px-4 py-3"><span className="text-base font-bold text-slate-800">{txn.productName || <span className="text-slate-400 italic text-sm font-normal">Deleted product</span>}</span></td>
                         <td className="px-4 py-3"><span className="font-mono text-sm font-semibold text-teal-700 bg-teal-50 px-2 py-1 rounded-lg">{txn.productCode || '—'}</span></td>
                         <td className="px-4 py-3"><span className="text-sm font-semibold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg">{txn.category || '—'}</span></td>
                         <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{txn.quantity}</span><span className="text-sm text-slate-500 ml-1">{txn.defaultUnits || 'units'}</span></td>

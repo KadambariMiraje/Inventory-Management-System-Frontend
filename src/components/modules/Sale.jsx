@@ -9,7 +9,7 @@ import {
 
 const EMPTY_FORM = {
   quantity:     '',
-  interestRate: '',
+  mrp:          '',
   customerName: '',
 };
 
@@ -30,12 +30,10 @@ export default function Sale() {
   const [submitting,   setSubmitting]   = useState(false);
   const [msg,          setMsg]          = useState(null);
 
-  // Auth guard
   useEffect(() => {
     if (!authLoading && (!user || !token)) navigate('/login');
   }, [user, token, authLoading, navigate]);
 
-  // Fetch categories
   useEffect(() => {
     if (authLoading || !token) return;
     setLoadingCats(true);
@@ -45,7 +43,6 @@ export default function Sale() {
       .finally(() => setLoadingCats(false));
   }, [authLoading, token]);
 
-  // Fetch products when category changes
   useEffect(() => {
     if (!selectedCat) { setProducts([]); setSelectedProd(''); setProductUnit(''); return; }
     setLoadingProds(true);
@@ -57,7 +54,6 @@ export default function Sale() {
       .finally(() => setLoadingProds(false));
   }, [selectedCat]);
 
-  // Fetch unit when product is selected
   useEffect(() => {
     if (!selectedProd) { setProductUnit(''); return; }
     setLoadingUnit(true);
@@ -84,7 +80,7 @@ export default function Sale() {
         category:     selectedCat,
         productName:  selectedProd,
         quantity:     parseFloat(form.quantity),
-        interestRate: form.interestRate ? parseFloat(form.interestRate) : null,
+        mrp:          form.mrp ? parseFloat(form.mrp) : null,
         customerName: form.customerName.trim(),
       };
       const res = await transactionAPI.sale(payload);
@@ -142,10 +138,7 @@ export default function Sale() {
           {/* Step 1 — Select Product */}
           <div>
             
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Category */}
               <div>
                 <label className={labelCls}>Category</label>
                 <div className="relative">
@@ -159,7 +152,6 @@ export default function Sale() {
                 </div>
               </div>
 
-              {/* Product Name */}
               <div>
                 <label className={labelCls}>Product Name</label>
                 <div className="relative">
@@ -178,10 +170,9 @@ export default function Sale() {
                   {loadingProds && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-teal-500" />}
                 </div>
               </div>
-
             </div>
 
-            {/* Unit display — shows after product is selected */}
+            {/* Unit display */}
             {selectedProd && (
               <div className="mt-3">
                 <label className={labelCls}>Default Unit</label>
@@ -198,7 +189,7 @@ export default function Sale() {
             )}
           </div>
 
-          
+        
 
           {/* Step 2 — Sale Details */}
           <div>
@@ -224,10 +215,10 @@ export default function Sale() {
             </div>
 
             <div>
-              <label className={labelCls}>Interest Rate (%)</label>
-              <input type="number" name="interestRate" className={inputCls}
-                value={form.interestRate} onChange={handleChange}
-                placeholder="e.g. 5.0 (optional)" step="0.01" min="0"
+              <label className={labelCls}>MRP (₹)</label>
+              <input type="number" name="mrp" className={inputCls}
+                value={form.mrp} onChange={handleChange}
+                placeholder="e.g. 150.00 (optional)" step="0.01" min="0"
                 disabled={submitting} />
             </div>
           </div>
@@ -239,7 +230,6 @@ export default function Sale() {
               ? <><Loader2 size={18} className="animate-spin" />Processing…</>
               : <><ShoppingCart size={18} />Record Sale</>}
           </button>
-
         </form>
       </div>
     </div>

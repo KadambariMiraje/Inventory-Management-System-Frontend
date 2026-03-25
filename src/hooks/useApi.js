@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.155:8083/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.157:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -34,6 +34,11 @@ export const authAPI = {
   updateProfile:     (data) => api.post('/user/updateuser', data),
   verifyPasswordOtp: (data) => api.post('/user/verifypasswordforotp', data),
   updatePassword:    (data) => api.post('/user/updatepassword', data),
+
+  forgotByUsername: (username) => api.get(`/user/forgetpassword/username/sendotp/${username}`),
+  forgotByEmail:    (email)    => api.get(`/user/forgetpassword/email/sendotp/${email}`),
+  resetPasswordByUsername:    (data)     => api.post('/user/forgetpassword/username/recoveraccount', data),
+  resetPasswordByEmail:    (data)     => api.post('/user/forgetpassword/email/recoveraccount', data),
 };
 
 // Products
@@ -41,11 +46,10 @@ export const productAPI = {
   getAll:           ()           => api.get('/product'),
   getById:          (id)         => api.get(`/product/${id}`),
   addProduct:       (data)       => api.post('/product/addproduct', data),
-  update:           (id, d)      => api.put(`/product/${id}`, d),
+  update:           (id, data)      => api.put(`/product/${id}`, data),
   getCategories:    ()           => api.get('/product/getcategory'),
   getByCategory:    (cat)        => api.post(`/product/getproductname/${encodeURIComponent(cat)}`),
   getLowStock:      ()           => api.get('/product/lowstockitems'),
-  getAllWithBatches: ()           => api.get('/product/allproducts'),
   getAllWithBatches: ()           => api.get('/product/allproducts'),
   getProductUnit: (name)          => api.post(`/product/getunit/${encodeURIComponent(name)}`),
   editProduct:      (code, data) => api.put('/product/updateproduct', { productCode: code, ...data }),

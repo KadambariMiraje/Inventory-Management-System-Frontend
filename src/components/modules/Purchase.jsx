@@ -131,11 +131,6 @@ export default function Purchase() {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Purchase Stock</h3>
-            {prefill.productName && (
-              <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg">
-                Pre-filled from Low Stock
-              </span>
-            )}
           </div>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Add new batch stock for a product</p>
         </div>
