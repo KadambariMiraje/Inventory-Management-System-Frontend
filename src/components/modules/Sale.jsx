@@ -180,7 +180,7 @@ export default function Sale() {
                   {loadingUnit ? (
                     <><Loader2 size={14} className="animate-spin text-teal-500" /><span className="text-slate-400 text-sm">Fetching unit…</span></>
                   ) : productUnit ? (
-                    <><span className="text-base font-bold text-teal-700">{productUnit}</span><span className="text-sm text-slate-400 ml-1">— all quantities in this unit</span></>
+                    <><span className="text-base font-bold text-teal-700">{productUnit}</span></>
                   ) : (
                     <span className="text-slate-400 text-sm">No unit assigned to this product</span>
                   )}
@@ -215,7 +215,7 @@ export default function Sale() {
             </div>
 
             <div>
-              <label className={labelCls}>MRP (₹)</label>
+              <label className={labelCls}>MRP Per Quantity (₹)</label>
               <input type="number" name="mrp" className={inputCls}
                 value={form.mrp} onChange={handleChange}
                 placeholder="e.g. 150.00 (optional)" step="0.01" min="0"

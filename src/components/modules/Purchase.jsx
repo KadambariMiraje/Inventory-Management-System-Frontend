@@ -225,7 +225,7 @@ export default function Purchase() {
               </div>
               <div>
                 <label className={labelCls}>
-                  Current Quantity
+                  Quantity
                   {productUnit && <span className="ml-1 text-teal-600 normal-case font-semibold">({productUnit})</span>}
                 </label>
                 <input type="number" name="currQuantity" className={inputCls}
@@ -236,7 +236,7 @@ export default function Purchase() {
             </div>
 
             <div className="mb-4">
-              <label className={labelCls}>Purchase Price (₹)</label>
+              <label className={labelCls}>Batch Purchase Price (₹)</label>
               <input type="number" name="purchasePrice" className={inputCls}
                 value={form.purchasePrice} onChange={handleChange}
                 placeholder="e.g. 500.00" step="0.01" min="0"

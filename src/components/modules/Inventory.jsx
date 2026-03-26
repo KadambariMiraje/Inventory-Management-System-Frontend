@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { productAPI, batchAPI } from '../../hooks/useApi';
 import {
   Search, Pencil, Trash2, ChevronDown, ChevronRight,
-  Loader2, CheckCircle, AlertCircle, X, Package, RefreshCw, History,
+  Loader2, CheckCircle, AlertCircle, X, Package, RefreshCw, History, PowerOff,
 } from 'lucide-react';
 
 const DEFAULT_CATEGORIES = [
@@ -13,16 +13,18 @@ const DEFAULT_CATEGORIES = [
 ];
 
 /* ── Confirm dialog ──────────────────────────────────────────── */
-function ConfirmDialog({ message, onConfirm, onCancel }) {
+function ConfirmDialog({ message, onConfirm, onCancel, isDeactivate }) {
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-            <Trash2 size={20} className="text-red-600" />
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ${isDeactivate ? 'bg-orange-100' : 'bg-red-100'}`}>
+            {isDeactivate
+              ? <PowerOff size={20} className="text-orange-600" />
+              : <Trash2 size={20} className="text-red-600" />}
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-800">Confirm Delete</h3>
+            <h3 className="text-base font-bold text-slate-800">Confirm</h3>
             <p className="text-sm text-slate-500 mt-0.5">{message}</p>
           </div>
         </div>
@@ -32,8 +34,8 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
             Cancel
           </button>
           <button onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-sm font-semibold text-white transition-colors">
-            Delete
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${isDeactivate ? 'bg-orange-500 hover:bg-orange-600' : 'bg-red-600 hover:bg-red-700'}`}>
+            {isDeactivate ? 'Deactivate' : 'Delete'}
           </button>
         </div>
       </div>
@@ -221,7 +223,7 @@ function EditBatchModal({ batch, onSave, onClose }) {
 
 /* ── Main Inventory component ────────────────────────────────── */
 export default function Inventory() {
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, token, loading: authLoading, isOwner } = useAuth();
   const navigate = useNavigate();
 
   const [products, setProducts]       = useState([]);
@@ -245,9 +247,10 @@ export default function Inventory() {
       const data = res.data || [];
       setProducts(data);
       setFiltered(data);
-      const allExpanded = {};
-      data.forEach(p => { allExpanded[p.productCode] = true; });
-      setExpanded(allExpanded);
+      // ── All collapsed by default ──
+      const allCollapsed = {};
+      data.forEach(p => { allCollapsed[p.productCode] = false; });
+      setExpanded(allCollapsed);
     } catch {
       setMsg({ type: 'error', text: 'Failed to load inventory.' });
     } finally { setFetching(false); }
@@ -268,26 +271,27 @@ export default function Inventory() {
   }, [search, products]);
 
   const toggleExpand = (code) => setExpanded(prev => ({ ...prev, [code]: !prev[code] }));
-
   const showMsg = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg(null), 3500); };
 
   const handleDeleteProduct = (product) => {
     setConfirm({
-      message: `Delete "${product.productName}" and all its batches and transactions?`,
+      isDeactivate: true,
+      message: `Deactivate "${product.productName}" and delete all its batches?`,
       onConfirm: async () => {
         setConfirm(null);
-        try { await productAPI.deleteProduct(product.productCode); showMsg('success', `"${product.productName}" deleted.`); fetchProducts(); }
-        catch (err) { showMsg('error', typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to delete product.'); }
+        try { await productAPI.deleteProduct(product.productCode); showMsg('success', `${product.productName} deactivated successfully.`); fetchProducts(); }
+        catch (err) { showMsg('error', typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to deactivate product.'); }
       },
     });
   };
 
   const handleDeleteBatch = (batch, productName) => {
     setConfirm({
+      isDeactivate: false,
       message: `Delete batch "${batch.batchNumber}" from ${productName}?`,
       onConfirm: async () => {
         setConfirm(null);
-        try { await batchAPI.deleteBatch(batch.id); showMsg('success', `Batch "${batch.batchNumber}" deleted.`); fetchProducts(); }
+        try { await batchAPI.deleteBatch(batch.id); showMsg('success', `${batch.batchNumber} deleted successfully.`); fetchProducts(); }
         catch (err) { showMsg('error', typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to delete batch.'); }
       },
     });
@@ -354,7 +358,7 @@ export default function Inventory() {
         </div>
       ) : (
         <>
-          {/* ── MOBILE: card layout (hidden on md+) ─────────────── */}
+          {/* ── MOBILE: card layout ─────────────────────────────── */}
           <div className="md:hidden space-y-4">
             {filtered.map(product => {
               const isOpen   = !!expanded[product.productCode];
@@ -363,7 +367,6 @@ export default function Inventory() {
               return (
                 <div key={product.productCode} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
-                  {/* Product card header */}
                   <div className="flex items-start justify-between p-4 gap-3">
                     <button onClick={() => toggleExpand(product.productCode)} className="mt-0.5 p-1 rounded-lg hover:bg-slate-100 text-slate-400 flex-shrink-0">
                       {isOpen ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
@@ -372,10 +375,28 @@ export default function Inventory() {
                       <p className="text-base font-bold text-slate-800 truncate">{product.productName}</p>
                       <span className="font-mono text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{product.productCode}</span>
                     </div>
+                    {/* ── MOBILE product actions ── */}
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="View history"><History size={15} /></button>
-                      <button onClick={() => setEditProduct(product)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors"><Pencil size={15} /></button>
-                      <button onClick={() => handleDeleteProduct(product)} className="p-2 rounded-xl hover:bg-red-100 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={15} /></button>
+                      {/* History — owner only */}
+                      {isOwner && (
+                        <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
+                          className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="View history">
+                          <History size={15} />
+                        </button>
+                      )}
+                      {isOwner && (
+                        <>
+                          <button onClick={() => setEditProduct(product)}
+                            className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="Edit">
+                            <Pencil size={15} />
+                          </button>
+                          {/* Deactivate icon for product */}
+                          <button onClick={() => handleDeleteProduct(product)}
+                            className="p-2 rounded-xl hover:bg-orange-100 text-slate-400 hover:text-orange-600 transition-colors" title="Deactivate">
+                            <PowerOff size={15} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -421,10 +442,19 @@ export default function Inventory() {
                                 className={`rounded-xl border p-3 ${isExpired ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'}`}>
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="font-mono text-sm font-bold text-teal-700">{batch.batchNumber}</span>
-                                  <div className="flex gap-1">
-                                    <button onClick={() => setEditBatch(batch)} className="p-1.5 rounded-lg hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors"><Pencil size={13} /></button>
-                                    <button onClick={() => handleDeleteBatch(batch, product.productName)} className="p-1.5 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={13} /></button>
-                                  </div>
+                                  {/* ── MOBILE batch actions — owner only ── */}
+                                  {isOwner && (
+                                    <div className="flex gap-1">
+                                      <button onClick={() => setEditBatch(batch)}
+                                        className="p-1.5 rounded-lg hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors">
+                                        <Pencil size={13} />
+                                      </button>
+                                      <button onClick={() => handleDeleteBatch(batch, product.productName)}
+                                        className="p-1.5 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition-colors">
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                   <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-700">{batch.currentQuantity} {product.defaultUnits || 'units'}</span></div>
@@ -448,11 +478,11 @@ export default function Inventory() {
             })}
           </div>
 
-          {/* ── DESKTOP: table layout (hidden below md) ──────────── */}
+          {/* ── DESKTOP: table layout ────────────────────────────── */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead className="bg-teal-600">
+              <table className="w-full border-collapse bg-teal-600">
+                <thead >
                   <tr>
                     <th className="px-4 py-3 w-10" />
                     <th className={thCls}>Product Name</th>
@@ -461,7 +491,7 @@ export default function Inventory() {
                     <th className={thCls}>Stock</th>
                     <th className={thCls}>Per Item</th>
                     <th className={thCls}>Total Value</th>
-                    <th className={thCls + " text-right"}>Actions</th>
+                    {isOwner && <th className={thCls + " text-right"}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -489,11 +519,29 @@ export default function Inventory() {
                           </td>
                           <td className="px-4 py-3"><span className="text-base font-semibold text-slate-700">₹{product.perItemPrice?.toFixed(2) ?? '0.00'}</span></td>
                           <td className="px-4 py-3"><span className="text-base font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</span></td>
+                          {/* ── DESKTOP product actions ── */}
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1.5">
-                              <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="View history"><History size={16} /></button>
-                              <button onClick={() => setEditProduct(product)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit"><Pencil size={16} /></button>
-                              <button onClick={() => handleDeleteProduct(product)} className="p-2 rounded-xl hover:bg-red-100 text-slate-500 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
+                              {/* History — owner only */}
+                              {isOwner && (
+                                <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
+                                  className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="View history">
+                                  <History size={16} />
+                                </button>
+                              )}
+                              {isOwner && (
+                                <>
+                                  <button onClick={() => setEditProduct(product)}
+                                    className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit">
+                                    <Pencil size={16} />
+                                  </button>
+                                  {/* Deactivate icon for product */}
+                                  <button onClick={() => handleDeleteProduct(product)}
+                                    className="p-2 rounded-xl hover:bg-orange-100 text-slate-500 hover:text-orange-600 transition-colors" title="Deactivate">
+                                    <PowerOff size={16} />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -514,9 +562,9 @@ export default function Inventory() {
                                       <tr className="bg-slate-200">
                                         <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Batch No</th>
                                         <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Quantity</th>
-                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Purchase Price</th>
+                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Batch Purchase Price</th>
                                         <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Expiry Date</th>
-                                        <th className="px-4 py-2.5 text-right text-sm font-bold text-slate-700 uppercase tracking-wide">Actions</th>
+                                        {isOwner && <th className="px-4 py-2.5 text-right text-sm font-bold text-slate-700 uppercase tracking-wide">Actions</th>}
                                       </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -536,12 +584,21 @@ export default function Inventory() {
                                                 </div>
                                               ) : <span className="text-sm text-slate-400">No expiry</span>}
                                             </td>
-                                            <td className="px-4 py-3">
-                                              <div className="flex items-center justify-end gap-1.5">
-                                                <button onClick={() => setEditBatch(batch)} className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit batch"><Pencil size={15} /></button>
-                                                <button onClick={() => handleDeleteBatch(batch, product.productName)} className="p-2 rounded-xl hover:bg-red-100 text-slate-500 hover:text-red-600 transition-colors" title="Delete batch"><Trash2 size={15} /></button>
-                                              </div>
-                                            </td>
+                                            {/* ── DESKTOP batch actions — owner only ── */}
+                                            {isOwner && (
+                                              <td className="px-4 py-3">
+                                                <div className="flex items-center justify-end gap-1.5">
+                                                  <button onClick={() => setEditBatch(batch)}
+                                                    className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit batch">
+                                                    <Pencil size={15} />
+                                                  </button>
+                                                  <button onClick={() => handleDeleteBatch(batch, product.productName)}
+                                                    className="p-2 rounded-xl hover:bg-red-100 text-slate-500 hover:text-red-600 transition-colors" title="Delete batch">
+                                                    <Trash2 size={15} />
+                                                  </button>
+                                                </div>
+                                              </td>
+                                            )}
                                           </tr>
                                         );
                                       })}
@@ -565,7 +622,7 @@ export default function Inventory() {
       {/* Modals */}
       {editProduct && <EditProductModal product={editProduct} onSave={() => { setEditProduct(null); showMsg('success', 'Product updated.'); fetchProducts(); }} onClose={() => setEditProduct(null)} />}
       {editBatch   && <EditBatchModal   batch={editBatch}     onSave={() => { setEditBatch(null);   showMsg('success', 'Batch updated.');   fetchProducts(); }} onClose={() => setEditBatch(null)} />}
-      {confirm     && <ConfirmDialog    message={confirm.message} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}
+      {confirm     && <ConfirmDialog    message={confirm.message} isDeactivate={confirm.isDeactivate} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}
 
     </div>
   );

@@ -294,6 +294,7 @@ export default function LoginPage({ onGoRegister }) {
       login(res.data.token, {
         fullName:  res.data.fullName,
         email:     res.data.email,
+        role:      res.data.role, 
         storeName: res.data.storeName,
         gstNumber: res.data.gstNumber,
       });

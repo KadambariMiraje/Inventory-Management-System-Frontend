@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://inventory-management-system-8qsl.onrender.com/api';
+// const BASE_URL = import.meta.env.VITE_API_URL || 'https://inventory-management-system-8qsl.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.163:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -63,6 +64,12 @@ export const batchAPI = {
   deleteBatch: (id)         => api.delete(`/product/deletebatch/${id}`),
   getExpiring: (days)       => api.get('/product/expiryitems'),
   getExpired:  ()           => api.get('/product/expiryitems'),
+};
+
+export const staffAPI = {
+  add:    (data)     => api.post('/staff/addstaff', data),
+  getAll: ()         => api.get('/staff/getstaff'),
+  delete: (id) => api.delete(`/staff/deletestaff/${id}`),
 };
 
 // Transactions

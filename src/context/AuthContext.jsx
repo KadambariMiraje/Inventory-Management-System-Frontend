@@ -58,8 +58,13 @@ export default function AuthProvider({ children }) {
     setUser(updated);
   };
 
+  console.log(user);
+
+  const isOwner = user?.role === "ROLE_OWNER";
+  const isStaff = user?.role === "ROLE_STAFF";
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, loading , isOwner, isStaff}}>
       {children}
     </AuthContext.Provider>
   );
