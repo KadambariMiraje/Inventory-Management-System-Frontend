@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://inventory-management-system-8qsl.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://65.2.189.227:8083/api';
 // const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.163:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
