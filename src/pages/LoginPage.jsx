@@ -60,7 +60,6 @@ function ForgotPassword({ onBack }) {
       });
 
       }
-      
       setStep(3);
     } catch (err) {
       const d = err.response?.data;
@@ -288,6 +287,7 @@ export default function LoginPage({ onGoRegister }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError(''); setLoading(true);
     try {
       const res = await authAPI.login(form);

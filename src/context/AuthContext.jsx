@@ -57,9 +57,7 @@ export default function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(updated));
     setUser(updated);
   };
-
-  console.log(user);
-
+  
   const isOwner = user?.role === "ROLE_OWNER";
   const isStaff = user?.role === "ROLE_STAFF";
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://65-2-189-227.nip.io/api';
-
+// const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.169:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -63,7 +63,7 @@ export const batchAPI = {
   editBatch:   (id, data)   => api.put('/product/updatebatch', { id, ...data }),
   deleteBatch: (id)         => api.delete(`/product/deletebatch/${id}`),
   getExpiring: (days)       => api.get('/product/expiryitems'),
-  getExpired:  ()           => api.get('/product/expiryitems'),
+  // getExpired:  ()           => api.get('/product/expiryitems'),
 };
 
 export const staffAPI = {

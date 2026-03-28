@@ -29,7 +29,8 @@ export default function RegisterPage({ onGoLogin }) {
         onGoLogin ? onGoLogin() : navigate("/login"); 
       }, 2000);
     } catch (err) {
-      setError(err.response?.data || "Registration failed. Please try again.");
+      const d = err.response?.data;
+      setError(typeof d === 'string' ? d : d?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
