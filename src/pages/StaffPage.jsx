@@ -190,7 +190,6 @@ function DeleteConfirmModal({ staff, onConfirm, onCancel, deleting }) {
         <p className="text-sm text-slate-500 text-center mb-6">
           Are you sure you want to remove{' '}
           <span className="font-semibold text-slate-700">{staff.fullName}</span>?
-          This action cannot be undone.
         </p>
         <div className="flex gap-3">
           <button onClick={onCancel} disabled={deleting}
@@ -219,9 +218,6 @@ function StaffCard({ staff, onDelete }) {
           <div className="min-w-0">
             <p className="text-sm font-bold text-slate-800 truncate">{staff.fullName}</p>
             <p className="text-xs text-slate-400 truncate">{staff.email}</p>
-            {/* <span className="text-xs font-mono font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100 mt-0.5 inline-block">
-              @{staff.id}
-            </span> */}
           </div>
         </div>
         <button onClick={() => onDelete(staff)}

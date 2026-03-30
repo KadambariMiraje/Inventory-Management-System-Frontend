@@ -461,12 +461,6 @@ export default function Navbar() {
                         </div>
                       )}
 
-                      {/* Staff info row */}
-                      {!isOwner && (
-                        <div className="px-5 py-4">
-                          <p className="text-xs text-slate-400 text-center">Contact your store owner to update account details.</p>
-                        </div>
-                      )}
                     </div>
                   </>
                 )}
