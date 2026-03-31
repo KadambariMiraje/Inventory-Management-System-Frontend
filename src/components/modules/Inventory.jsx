@@ -489,7 +489,8 @@ export default function Inventory() {
                   {filtered.map((product, idx) => {
                     const isOpen   = !!expanded[product.productCode];
                     const totalQty = product.totalQuantity || 0;
-                    const isLow    = totalQty <= (product.minStockLevel || 0);
+                    const minLevel = product.minStockLevel ?? 0;
+                    const isLow = totalQty < minLevel;
                     return (
                       <React.Fragment key={product.productCode}>
                         <tr className={`transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-teal-50`}>
