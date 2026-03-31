@@ -5,32 +5,30 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'https://65-2-189-227.nip.io/ap
 
 const api = axios.create({ baseURL: BASE_URL });
 
-// Attach JWT to every request
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Auto logout when token expires (401)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear stored credentials
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Redirect to login — works outside React components
+      
       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
  
-// Auth
 export const authAPI = {
   register: (data) => api.post('/user/signup', data),
   login:    (data) => api.post('/user/login', data),
+
   sendOtp:       ()     => api.get('/user/sendotp'),
   updateProfile:     (data) => api.post('/user/updateuser', data),
   verifyPasswordOtp: (data) => api.post('/user/verifypasswordforotp', data),
@@ -42,7 +40,6 @@ export const authAPI = {
   resetPasswordByEmail:    (data)     => api.post('/user/forgetpassword/email/recoveraccount', data),
 };
 
-// Products
 export const productAPI = {
   getAll:           ()           => api.get('/product'),
   getById:          (id)         => api.get(`/product/${id}`),
@@ -57,13 +54,11 @@ export const productAPI = {
   deleteProduct:    (code)       => api.delete(`/product/deleteproduct/${code}`),
 };
 
-// Batches / Purchase
 export const batchAPI = {
   purchase:    (data)       => api.post('/product/addbatch', data),
   editBatch:   (id, data)   => api.put('/product/updatebatch', { id, ...data }),
   deleteBatch: (id)         => api.delete(`/product/deletebatch/${id}`),
   getExpiring: (days)       => api.get('/product/expiryitems'),
-  // getExpired:  ()           => api.get('/product/expiryitems'),
 };
 
 export const staffAPI = {
@@ -72,7 +67,6 @@ export const staffAPI = {
   delete: (id) => api.delete(`/staff/deletestaff/${id}`),
 };
 
-// Transactions
 export const transactionAPI = {
   getAll: (params) => api.get('/transaction/alltransactions', { params }),
   sale:   (data)   => api.post('/product/sale', data),

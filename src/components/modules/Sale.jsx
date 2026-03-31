@@ -107,7 +107,6 @@ export default function Sale() {
   return (
     <div className="max-w-2xl mx-auto">
 
-      {/* Heading */}
       <div className="flex items-center gap-3 mb-6 sm:mb-8">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
           <ShoppingCart size={20} className="text-white" />
@@ -118,7 +117,6 @@ export default function Sale() {
         </div>
       </div>
 
-      {/* Alert */}
       {msg && (
         <div className={`flex items-start gap-3 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 mb-6 text-sm font-medium shadow-sm ${
           msg.type === 'success'
@@ -135,7 +133,6 @@ export default function Sale() {
       <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Step 1 — Select Product */}
           <div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -172,7 +169,6 @@ export default function Sale() {
               </div>
             </div>
 
-            {/* Unit display */}
             {selectedProd && (
               <div className="mt-3">
                 <label className={labelCls}>Default Unit</label>
@@ -189,12 +185,7 @@ export default function Sale() {
             )}
           </div>
 
-        
-
-          {/* Step 2 — Sale Details */}
           <div>
-            
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className={labelCls}>
@@ -218,12 +209,11 @@ export default function Sale() {
               <label className={labelCls}>MRP Per Quantity (₹)</label>
               <input type="number" name="mrp" className={inputCls}
                 value={form.mrp} onChange={handleChange}
-                placeholder="e.g. 150.00 (optional)" step="0.01" min="0"
+                placeholder="e.g. 150.00 " step="0.01" min="0"
                 disabled={submitting} />
             </div>
           </div>
 
-          {/* Submit */}
           <button type="submit" disabled={submitting}
             className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
             {submitting

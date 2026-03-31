@@ -65,13 +65,6 @@ export default function DashboardHome() {
 
   if (authLoading) return null;
 
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
   const formatTime = (d) => d ? new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '';
 
@@ -92,17 +85,6 @@ export default function DashboardHome() {
   return (
     <div>
 
-      {/* Welcome header
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
-          {greeting()}, {user?.fullName?.split(' ')[0]} 👋
-        </h1>
-        <p className="text-sm sm:text-base text-slate-500 mt-1">
-          {user?.storeName} — here's a quick overview of your inventory.
-        </p>
-      </div> */}
-
-      {/* Error */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-2xl px-4 py-3 mb-6">
           {error}
@@ -115,7 +97,7 @@ export default function DashboardHome() {
         </div>
       ) : (
         <>
-          {/* ── Stat cards ────────────────────────────────────── */}
+  
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {statCards.map(card => {
               const c    = colorMap[card.color];
@@ -137,7 +119,6 @@ export default function DashboardHome() {
             })}
           </div>
 
-          {/* ── Quick actions ─────────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 sm:mb-8">
             {[
               { label: 'Add Product',   icon: Package,     path: '/dashboard/add-product', color: 'teal'   },
@@ -159,7 +140,6 @@ export default function DashboardHome() {
             })}
           </div>
 
-          {/* ── Recent transactions ───────────────────────────── */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h2 className="text-base sm:text-lg font-bold text-slate-800">Recent Transactions</h2>
@@ -173,7 +153,7 @@ export default function DashboardHome() {
               <p className="text-sm text-slate-400 text-center py-10">No transactions yet.</p>
             ) : (
               <>
-                {/* Mobile list */}
+
                 <div className="md:hidden divide-y divide-slate-100">
                   {recentTxns.map((t, i) => (
                     <div key={t.id ?? i} className="flex items-center gap-3 px-4 py-3">
@@ -192,7 +172,6 @@ export default function DashboardHome() {
                   ))}
                 </div>
 
-                {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">

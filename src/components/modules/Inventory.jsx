@@ -247,7 +247,6 @@ export default function Inventory() {
       const data = res.data || [];
       setProducts(data);
       setFiltered(data);
-      // ── All collapsed by default ──
       const allCollapsed = {};
       data.forEach(p => { allCollapsed[p.productCode] = false; });
       setExpanded(allCollapsed);
@@ -305,7 +304,6 @@ export default function Inventory() {
   return (
     <div>
 
-      {/* Heading + Refresh */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
@@ -325,7 +323,6 @@ export default function Inventory() {
         </button>
       </div>
 
-      {/* Alert */}
       {msg && (
         <div className={`flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium ${
           msg.type === 'success' ? 'bg-teal-50 text-teal-800 border border-teal-200' : 'bg-red-50 text-red-800 border border-red-200'
@@ -336,7 +333,6 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Search */}
       <div className="relative mb-5">
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -346,7 +342,6 @@ export default function Inventory() {
         {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={16} /></button>}
       </div>
 
-      {/* Content */}
       {fetching ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={32} className="animate-spin text-teal-600" />
@@ -358,7 +353,6 @@ export default function Inventory() {
         </div>
       ) : (
         <>
-          {/* ── MOBILE: card layout ─────────────────────────────── */}
           <div className="md:hidden space-y-4">
             {filtered.map(product => {
               const isOpen   = !!expanded[product.productCode];
@@ -375,9 +369,9 @@ export default function Inventory() {
                       <p className="text-base font-bold text-slate-800 truncate">{product.productName}</p>
                       <span className="font-mono text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{product.productCode}</span>
                     </div>
-                    {/* ── MOBILE product actions ── */}
+                    
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      {/* History — owner only */}
+                      
                       {isOwner && (
                         <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
                           className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="View history">
@@ -390,7 +384,6 @@ export default function Inventory() {
                             className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="Edit">
                             <Pencil size={15} />
                           </button>
-                          {/* Deactivate icon for product */}
                           <button onClick={() => handleDeleteProduct(product)}
                             className="p-2 rounded-xl hover:bg-orange-100 text-slate-400 hover:text-orange-600 transition-colors" title="Deactivate">
                             <PowerOff size={15} />
@@ -400,7 +393,6 @@ export default function Inventory() {
                     </div>
                   </div>
 
-                  {/* Product details grid */}
                   <div className="grid grid-cols-2 gap-3 px-4 pb-4 border-t border-slate-100 pt-3">
                     <div>
                       <p className="text-xs text-slate-400 mb-0.5">Category</p>
@@ -424,7 +416,6 @@ export default function Inventory() {
                     </div>
                   </div>
 
-                  {/* Mobile batch list */}
                   {isOpen && (
                     <div className="border-t-2 border-teal-100 bg-slate-50">
                       <div className="flex items-center gap-2 px-4 pt-3 pb-2">
@@ -442,7 +433,6 @@ export default function Inventory() {
                                 className={`rounded-xl border p-3 ${isExpired ? 'bg-red-50 border-red-100' : 'bg-white border-slate-100'}`}>
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="font-mono text-sm font-bold text-teal-700">{batch.batchNumber}</span>
-                                  {/* ── MOBILE batch actions — owner only ── */}
                                   {isOwner && (
                                     <div className="flex gap-1">
                                       <button onClick={() => setEditBatch(batch)}
@@ -478,7 +468,7 @@ export default function Inventory() {
             })}
           </div>
 
-          {/* ── DESKTOP: table layout ────────────────────────────── */}
+  
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse bg-teal-600">

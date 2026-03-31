@@ -12,8 +12,7 @@ const handleLogout = () => { logout(); navigate('/login'); };
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-gray-100">
-        
-        {/* Icon Header */}
+
         <div className="flex justify-center mb-6">
           <div className="bg-red-100 p-4 rounded-full">
             <ShieldAlert className="w-12 h-12 text-red-600" />
@@ -29,7 +28,6 @@ const handleLogout = () => { logout(); navigate('/login'); };
           does not have permission to access this resource.
         </p>
 
-        {/* Action Buttons */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
           <button
             onClick={() => navigate("/dashboard")}
@@ -48,7 +46,6 @@ const handleLogout = () => { logout(); navigate('/login'); };
           </button>
         </div>
 
-        {/* Logout Option */}
         <button
           onClick={handleLogout}
           className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors duration-200 w-full"

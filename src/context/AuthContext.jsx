@@ -20,18 +20,6 @@ export default function AuthProvider({ children }) {
       } catch {
         localStorage.removeItem("user");
       }
-    // } else {
-    // // 👇 TEMP DEV LOGIN
-    // if (process.env.NODE_ENV === "development") {
-    //   const fakeUser = { id: 1, name: "Dev User", role: "admin" };
-    //   const fakeToken = "dev-token";
-
-    //   localStorage.setItem("token", fakeToken);
-    //   localStorage.setItem("user", JSON.stringify(fakeUser));
-
-    //   setToken(fakeToken);
-    //   setUser(fakeUser);
-    // }
   }
 
     setLoading(false);

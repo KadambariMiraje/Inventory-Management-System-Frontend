@@ -28,7 +28,7 @@ export default function ExpiringItems() {
   const [items,    setItems]    = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search,   setSearch]   = useState('');
-  const [tab,      setTab]      = useState('expiring'); // 'expiring' | 'expired'
+  const [tab,      setTab]      = useState('expiring'); 
   const [fetching, setFetching] = useState(true);
   const [error,    setError]    = useState('');
 
@@ -39,7 +39,7 @@ export default function ExpiringItems() {
   const fetchData = useCallback(async () => {
     setFetching(true); setError('');
     try {
-      // Single endpoint — filter expired vs expiring on frontend
+
       const res = await batchAPI.getExpiring();
       setAllItems(res.data || []);
     } catch {
@@ -53,7 +53,6 @@ export default function ExpiringItems() {
     if (!authLoading && token) fetchData();
   }, [authLoading, token, fetchData]);
 
-  // Split into expiring vs expired based on tab
   useEffect(() => {
     const today = new Date();
     if (tab === 'expired') {
@@ -64,7 +63,6 @@ export default function ExpiringItems() {
     setSearch('');
   }, [tab, allItems]);
 
-  // Search filter
   useEffect(() => {
     if (!search.trim()) { setFiltered(items); return; }
     const q = search.toLowerCase();
@@ -85,7 +83,6 @@ export default function ExpiringItems() {
   return (
     <div>
 
-      {/* Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-100">
@@ -103,14 +100,12 @@ export default function ExpiringItems() {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium bg-red-50 text-red-800 border border-red-200">
           <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />{error}
         </div>
       )}
 
-      {/* Summary stat cards */}
       {!fetching && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
@@ -128,7 +123,6 @@ export default function ExpiringItems() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="flex bg-slate-100 rounded-xl p-1 w-fit">
           {[
@@ -145,7 +139,6 @@ export default function ExpiringItems() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative mb-5">
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -155,7 +148,6 @@ export default function ExpiringItems() {
         {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={16} /></button>}
       </div>
 
-      {/* Content */}
       {fetching ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={32} className="animate-spin text-orange-500" />
@@ -170,7 +162,7 @@ export default function ExpiringItems() {
         </div>
       ) : (
         <>
-          {/* ── MOBILE: card layout ─────────────────────────────── */}
+
           <div className="md:hidden space-y-3">
             {filtered.map((batch, idx) => {
               const d          = daysUntilExpiry(batch.expiryDate);
@@ -203,7 +195,6 @@ export default function ExpiringItems() {
             })}
           </div>
 
-          {/* ── DESKTOP: table layout ────────────────────────────── */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">

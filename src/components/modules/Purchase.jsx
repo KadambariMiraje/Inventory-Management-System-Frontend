@@ -25,7 +25,7 @@ export default function Purchase() {
   const [products,     setProducts]     = useState([]);
   const [selectedCat,  setSelectedCat]  = useState(prefill.category    || '');
   const [selectedProd, setSelectedProd] = useState(prefill.productName || '');
-  const [productUnit,  setProductUnit]  = useState('');   // fetched from backend
+  const [productUnit,  setProductUnit]  = useState('');  
   const [loadingUnit,  setLoadingUnit]  = useState(false);
 
   const [form,      setForm]      = useState(EMPTY_FORM);
@@ -37,12 +37,10 @@ export default function Purchase() {
   const [msg,          setMsg]          = useState(null);
   const [firstLoad,    setFirstLoad]    = useState(true);
 
-  // Auth guard
   useEffect(() => {
     if (!authLoading && (!user || !token)) navigate('/login');
   }, [user, token, authLoading, navigate]);
 
-  // Fetch categories
   useEffect(() => {
     if (authLoading || !token) return;
     setLoadingCats(true);
@@ -52,7 +50,6 @@ export default function Purchase() {
       .finally(() => setLoadingCats(false));
   }, [authLoading, token]);
 
-  // Fetch products when category changes
   useEffect(() => {
     if (!selectedCat) { setProducts([]); if (!firstLoad) { setSelectedProd(''); setProductUnit(''); } return; }
     setLoadingProds(true);
@@ -63,7 +60,6 @@ export default function Purchase() {
       .finally(() => setLoadingProds(false));
   }, [selectedCat]);
 
-  // Fetch unit when product is selected
   useEffect(() => {
     if (!selectedProd) { setProductUnit(''); return; }
     setLoadingUnit(true);
@@ -73,7 +69,6 @@ export default function Purchase() {
       .finally(() => setLoadingUnit(false));
   }, [selectedProd]);
 
-  // Clear expiry date when checkbox unchecked
   useEffect(() => {
     if (!hasExpiry) setForm(f => ({ ...f, expiryDate: '' }));
   }, [hasExpiry]);
@@ -123,7 +118,6 @@ export default function Purchase() {
   return (
     <div className="max-w-2xl mx-auto">
 
-      {/* Heading */}
       <div className="flex items-center gap-3 mb-6 sm:mb-8">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
           <ShoppingBag size={20} className="text-white" />
@@ -136,7 +130,6 @@ export default function Purchase() {
         </div>
       </div>
 
-      {/* Alert */}
       {msg && (
         <div className={`flex items-start gap-3 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 mb-6 text-sm font-medium shadow-sm ${
           msg.type === 'success'
@@ -153,12 +146,8 @@ export default function Purchase() {
       <div className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Step 1 — Select Product */}
-          <div>
-            
+          <div> 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Category */}
               <div>
                 <label className={labelCls}>Category</label>
                 <div className="relative">
@@ -172,7 +161,6 @@ export default function Purchase() {
                 </div>
               </div>
 
-              {/* Product Name */}
               <div>
                 <label className={labelCls}>Product Name</label>
                 <div className="relative">
@@ -194,7 +182,6 @@ export default function Purchase() {
 
             </div>
 
-            {/* Unit display — shows after product is selected */}
             {(selectedProd) && (
               <div className="mt-3">
                 <label className={labelCls}>Default Unit</label>
@@ -202,7 +189,7 @@ export default function Purchase() {
                   {loadingUnit ? (
                     <><Loader2 size={14} className="animate-spin text-teal-500" /><span className="text-slate-400 text-sm">Fetching unit…</span></>
                   ) : productUnit ? (
-                    <><span className="text-base font-bold text-teal-700">{productUnit}</span><span className="text-sm text-slate-400 ml-1">— all quantities in this unit</span></>
+                    <><span className="text-base font-bold text-teal-700">{productUnit}</span></>
                   ) : (
                     <span className="text-slate-400 text-sm">No unit assigned to this product</span>
                   )}
@@ -211,11 +198,7 @@ export default function Purchase() {
             )}
           </div>
 
-         
-          {/* Step 2 — Batch Details */}
           <div>
-            
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className={labelCls}>Batch No</label>
@@ -244,13 +227,12 @@ export default function Purchase() {
             </div>
 
             <div className="mb-4">
-              <label className={labelCls}>Party Name</label>
+              <label className={labelCls}>Supplier Name</label>
               <input type="text" name="partyName" className={inputCls}
                 value={form.partyName} onChange={handleChange}
                 placeholder="e.g. Supplier / Vendor name" disabled={submitting} />
             </div>
 
-            {/* Expiry checkbox */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4">
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div className="relative flex-shrink-0">
@@ -286,7 +268,6 @@ export default function Purchase() {
             </div>
           </div>
 
-          {/* Submit */}
           <button type="submit" disabled={submitting}
             className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
             {submitting

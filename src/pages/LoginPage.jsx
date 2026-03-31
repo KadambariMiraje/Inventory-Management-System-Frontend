@@ -7,10 +7,10 @@ import {
   Mail, User, KeyRound, Lock, Eye, EyeOff, ArrowLeft,
 } from 'lucide-react';
 
-/* ── Forgot Password Flow ────────────────────────────────────── */
+/*  Forgot Password Flow  */
 function ForgotPassword({ onBack }) {
-  const [method,          setMethod]          = useState(null); // 'username' | 'email'
-  const [step,            setStep]            = useState(1);    // 1=input, 2=otp+newpass, 3=success
+  const [method,          setMethod]          = useState(null); 
+  const [step,            setStep]            = useState(1);    
   const [inputVal,        setInputVal]        = useState('');
   const [otpInput,        setOtpInput]        = useState('');
   const [newPassword,     setNewPassword]     = useState('');
@@ -23,7 +23,6 @@ function ForgotPassword({ onBack }) {
   const inputCls = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all shadow-sm placeholder:text-slate-300";
   const labelCls = "block text-sm font-bold text-slate-700 mb-1.5 ml-1 uppercase tracking-tight";
 
-  // Step 1 — send OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!inputVal.trim()) { setErr(`Please enter your ${method === 'username' ? 'username' : 'email'}.`); return; }
@@ -38,7 +37,6 @@ function ForgotPassword({ onBack }) {
     } finally { setLoading(false); }
   };
 
-  // Step 2 — OTP + new password together
   const handleVerifyAndReset = async (e) => {
     e.preventDefault();
     if (!otpInput.trim())                { setErr('Please enter the OTP.'); return; }
@@ -78,7 +76,6 @@ function ForgotPassword({ onBack }) {
     } finally { setLoading(false); }
   };
 
-  // ── Method selection ──
   if (!method) {
     return (
       <div className="space-y-4">
@@ -118,7 +115,7 @@ function ForgotPassword({ onBack }) {
 
   return (
     <div className="space-y-5">
-      {/* Header with back */}
+      
       <div className="flex items-center gap-3 mb-1">
         <button
           onClick={() => {
@@ -137,7 +134,6 @@ function ForgotPassword({ onBack }) {
         </div>
       </div>
 
-      {/* Step indicator — 2 steps now */}
       {step < 3 && (
         <div className="flex items-center gap-2">
           {[1, 2].map(s => (
@@ -149,14 +145,12 @@ function ForgotPassword({ onBack }) {
         </div>
       )}
 
-      {/* Error */}
       {err && (
         <div className="flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 rounded-xl px-4 py-3 text-sm font-medium">
           <AlertCircle size={15} className="flex-shrink-0" />{err}
         </div>
       )}
 
-      {/* Step 1 — username or email */}
       {step === 1 && (
         <form onSubmit={handleSendOtp} className="space-y-4">
           <p className="text-sm text-slate-500">
@@ -184,7 +178,6 @@ function ForgotPassword({ onBack }) {
         </form>
       )}
 
-      {/* Step 2 — OTP + new password (merged) */}
       {step === 2 && (
         <form onSubmit={handleVerifyAndReset} className="space-y-4">
           <div className="bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 flex items-center gap-2">
@@ -194,22 +187,20 @@ function ForgotPassword({ onBack }) {
             </p>
           </div>
 
-          {/* OTP */}
           <div>
             <label className={labelCls}>Enter OTP</label>
             <div className="relative">
               <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input className={inputCls + " pl-10 text-center tracking-[0.4em] text-xl font-bold"}
                 value={otpInput}
-                onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                placeholder="• • • • • •"
+                onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="• • • •"
                 required autoFocus />
             </div>
           </div>
 
           <div className="border-t border-slate-100 pt-1" />
 
-          {/* New password */}
           <div>
             <label className={labelCls}>New Password</label>
             <div className="relative">
@@ -225,7 +216,6 @@ function ForgotPassword({ onBack }) {
             </div>
           </div>
 
-          {/* Confirm password */}
           <div>
             <label className={labelCls}>Confirm Password</label>
             <div className="relative">
@@ -255,7 +245,6 @@ function ForgotPassword({ onBack }) {
         </form>
       )}
 
-      {/* Step 3 — success */}
       {step === 3 && (
         <div className="text-center py-4">
           <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto mb-4">
@@ -273,7 +262,7 @@ function ForgotPassword({ onBack }) {
   );
 }
 
-/* ── Login Page ──────────────────────────────────────────────── */
+/*  Login Page */
 export default function LoginPage({ onGoRegister }) {
   const { login } = useAuth();
   const navigate  = useNavigate();

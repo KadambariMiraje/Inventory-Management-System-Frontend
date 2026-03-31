@@ -70,9 +70,9 @@ export default function HeroPage() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* ── Hero ────────────────────────────────────────────── */}
+     
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-white to-white pt-16 pb-24 px-6 md:px-16">
-        {/* Background decoration */}
+        
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-teal-100/40 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal-50/60 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
@@ -124,7 +124,6 @@ export default function HeroPage() {
         </div>
       </section>
 
-      {/* ── Features grid ───────────────────────────────────── */}
       <section className="py-20 px-6 md:px-16 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
@@ -157,7 +156,6 @@ export default function HeroPage() {
         </div>
       </section>
 
-      {/* ── Why IMS ─────────────────────────────────────────── */}
       <section className="py-20 px-6 md:px-16 bg-teal-600">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
@@ -187,7 +185,6 @@ export default function HeroPage() {
         </div>
       </section>
 
-      {/* ── CTA ─────────────────────────────────────────────── */}
       {!user && (
         <section className="py-24 px-6 md:px-16 bg-white text-center">
           <div className="max-w-xl mx-auto">
@@ -211,7 +208,6 @@ export default function HeroPage() {
         </section>
       )}
 
-      {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="border-t border-slate-100 py-8 px-6 md:px-16 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="IMS" className="w-6 h-6 rounded-full" />

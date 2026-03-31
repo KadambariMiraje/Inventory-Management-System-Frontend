@@ -36,13 +36,11 @@ export default function ProductHistory() {
       const allTxns = txnRes.data || [];
       const allProds = prodRes.data || [];
 
-      // Find this product
       const prod = allProds.find(p => p.productCode === productCode);
       setProduct(prod || null);
 
-      // Filter transactions for this product
       const filtered = allTxns.filter(t => t.productCode === productCode);
-      // Sort newest first
+  
       setTransactions(filtered.sort((a, b) =>
         new Date(b.transactionDate) - new Date(a.transactionDate)
       ));
@@ -59,7 +57,6 @@ export default function ProductHistory() {
 
   const unit = product?.defaultUnits || 'units';
 
-  // ── Stats ──────────────────────────────────────────────────
   const totalPurchased = transactions
     .filter(t => t.type === 'PURCHASE')
     .reduce((s, t) => s + (t.quantity || 0), 0);
@@ -76,7 +73,6 @@ export default function ProductHistory() {
     .filter(t => t.type === 'PURCHASE')
     .reduce((s, t) => s + (t.totalAmount || 0), 0);
 
-  // ── Chart data — group by month ────────────────────────────
   const chartData = (() => {
     const map = {};
     transactions.forEach(t => {
@@ -101,7 +97,6 @@ export default function ProductHistory() {
   return (
     <div>
 
-      {/* Back + heading */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/dashboard/inventory')}
@@ -129,7 +124,6 @@ export default function ProductHistory() {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium bg-red-50 text-red-800 border border-red-200">
           <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />{error}
@@ -142,7 +136,7 @@ export default function ProductHistory() {
         </div>
       ) : (
         <>
-          {/* ── Stat cards ──────────────────────────────────── */}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
 
             <div className="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-teal-500 p-4 shadow-sm">
@@ -191,7 +185,6 @@ export default function ProductHistory() {
 
           </div>
 
-          {/* ── Extra stat row ───────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
             <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Total Spent</p>
@@ -212,7 +205,6 @@ export default function ProductHistory() {
             </div>
           </div>
 
-          {/* ── Chart ────────────────────────────────────────── */}
           {chartData.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 mb-6">
               <div className="flex items-center gap-2 mb-5">
@@ -237,7 +229,6 @@ export default function ProductHistory() {
             </div>
           )}
 
-          {/* ── Transactions ─────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h4 className="text-base font-bold text-slate-800">Transaction History</h4>
@@ -251,7 +242,7 @@ export default function ProductHistory() {
               </div>
             ) : (
               <>
-                {/* Mobile cards */}
+
                 <div className="md:hidden divide-y divide-slate-100">
                   {transactions.map((t, i) => {
                     const isSale = t.type === 'SALE';
@@ -276,7 +267,6 @@ export default function ProductHistory() {
                   })}
                 </div>
 
-                {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead className="bg-teal-600">

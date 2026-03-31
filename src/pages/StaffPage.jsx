@@ -6,7 +6,7 @@ import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, RefreshCw,
 } from 'lucide-react';
 
-/* ── Add Staff Modal ──────────────────────────────────────────── */
+/*  Add Staff Modal  */
 function AddStaffModal({ onClose, onAdded }) {
   const [step,            setStep]            = useState(1);
   const [username,        setUsername]        = useState('');
@@ -178,7 +178,7 @@ function AddStaffModal({ onClose, onAdded }) {
   );
 }
 
-/* ── Delete Confirm ───────────────────────────────────────────── */
+/*  Delete Confirm  */
 function DeleteConfirmModal({ staff, onConfirm, onCancel, deleting }) {
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
@@ -206,7 +206,7 @@ function DeleteConfirmModal({ staff, onConfirm, onCancel, deleting }) {
   );
 }
 
-/* ── Staff Card ───────────────────────────────────────────────── */
+/* Staff Card  */
 function StaffCard({ staff, onDelete }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
@@ -230,7 +230,7 @@ function StaffCard({ staff, onDelete }) {
   );
 }
 
-/* ── Staff Page ───────────────────────────────────────────────── */
+/*  Staff Page  */
 export default function StaffPage() {
   const { token, loading: authLoading } = useAuth();
   const [staffList,    setStaffList]    = useState([]);
@@ -271,7 +271,6 @@ export default function StaffPage() {
   return (
     <div>
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
@@ -297,7 +296,6 @@ export default function StaffPage() {
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium bg-red-50 text-red-800 border border-red-200">
           <AlertCircle size={18} className="text-red-500 flex-shrink-0" />{error}
@@ -309,7 +307,6 @@ export default function StaffPage() {
         </div>
       )}
 
-      {/* Content */}
       {fetching ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={32} className="animate-spin text-teal-600" />
@@ -337,7 +334,6 @@ export default function StaffPage() {
         </div>
       )}
 
-      {/* Modals */}
       {showAdd && (
         <AddStaffModal
           onClose={() => setShowAdd(false)}

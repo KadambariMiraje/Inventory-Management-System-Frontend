@@ -16,7 +16,7 @@ export default function DashboardLayout() {
 
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
   const firstName = user?.fullName?.split(" ")[0] || "";
 
   return (

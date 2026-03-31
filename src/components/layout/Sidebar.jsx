@@ -30,7 +30,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── Mobile hamburger ───────────────────────────────────── */}
       <button
         onClick={() => setIsOpen(o => !o)}
         className="md:hidden fixed top-4 left-3 z-[200] p-2 bg-teal-600 text-white rounded-full shadow-lg active:scale-95 transition-transform"
@@ -39,7 +38,6 @@ export default function Sidebar() {
         {isOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
 
-      {/* ── Mobile backdrop ────────────────────────────────────── */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] md:hidden"
@@ -47,7 +45,6 @@ export default function Sidebar() {
         />
       )}
 
-      {/* ── Sidebar ────────────────────────────────────────────── */}
       <aside className={`
         fixed left-0 top-0 bottom-0 z-[160] w-64 bg-slate-50 border-r border-slate-200
         transform transition-transform duration-300 ease-in-out
@@ -55,13 +52,11 @@ export default function Sidebar() {
         md:translate-x-0 md:top-20
       `}>
 
-        {/* Mobile top bar */}
         <div className="md:hidden h-16 bg-teal-700 flex items-center px-4 gap-3 flex-shrink-0">
           <img src="/logo.png" alt="IMS" className="w-8 h-8 rounded-full object-cover" />
           <span className="text-white font-bold text-sm tracking-widest uppercase">IMS Menu</span>
         </div>
 
-        {/* Nav list */}
         <nav className="overflow-y-auto py-4 px-3 space-y-1 h-[calc(100vh-4rem)]">
           {NAV_ITEMS.map((item) => {
             if (item.ownerOnly && !isOwner) return null;

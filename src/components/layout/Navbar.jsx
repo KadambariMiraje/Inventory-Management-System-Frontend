@@ -8,7 +8,7 @@ import {
   Lock, Eye, EyeOff, ChevronDown,
 } from 'lucide-react';
 
-/* ── Update Profile Modal ────────────────────────────────────── */
+/*Update Profile Modal */
 function UpdateProfileModal({ onClose }) {
   const { user, updateUser } = useAuth();
   const [step,      setStep]      = useState(1);
@@ -95,11 +95,11 @@ function UpdateProfileModal({ onClose }) {
               </div>
               <div>
                 <label className={labelCls}>Full Name</label>
-                <div className="relative"><User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10"} value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Your full name" required /></div>
+                <div className="relative"><User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10"} value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Your full name"  /></div>
               </div>
               <div>
                 <label className={labelCls}>Store Name</label>
-                <div className="relative"><Store size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10"} value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name" required /></div>
+                <div className="relative"><Store size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10"} value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name"  /></div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-base font-semibold text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
@@ -123,7 +123,7 @@ function UpdateProfileModal({ onClose }) {
               </div>
               <div>
                 <label className={labelCls}>Enter OTP</label>
-                <div className="relative"><KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10 text-center tracking-[0.5em] text-xl font-bold"} value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="• • • • • •" required autoFocus /></div>
+                <div className="relative"><KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /><input className={inputCls + " pl-10 text-center tracking-[0.5em] text-xl font-bold"} value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="• • • • "  autoFocus /></div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => { setStep(1); setErr(''); setOtpInput(''); }} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-base font-semibold text-slate-600 hover:bg-slate-50 transition-colors">Back</button>
@@ -149,13 +149,10 @@ function UpdateProfileModal({ onClose }) {
   );
 }
 
-/* ── Update Password Modal — 2 steps ────────────────────────── */
+/* Update Password Modal  */
 function UpdatePasswordModal({ onClose }) {
   const { logout } = useAuth();
-  const navigate   = useNavigate();
-
-  // Step 1: username + current password → sends OTP
-  // Step 2: OTP + new password + confirm password → updates
+  
   const [step,            setStep]            = useState(1);
   const [username,        setUsername]        = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -172,7 +169,6 @@ function UpdatePasswordModal({ onClose }) {
   const inputCls = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all";
   const labelCls = "block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-tight";
 
-  // Step 1 → POST /verifypasswordforotp { username, password } → OTP sent
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!username.trim())        { setErr('Username is required.'); return; }
@@ -187,7 +183,6 @@ function UpdatePasswordModal({ onClose }) {
     } finally { setSending(false); }
   };
 
-  // Step 2 → POST /updatepassword { otp, username, password, newPassword }
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (!otpInput.trim())               { setErr('Please enter the OTP.'); return; }
@@ -215,7 +210,6 @@ function UpdatePasswordModal({ onClose }) {
     finally { setSending(false); }
   };
 
-  // Auto logout after success
   useEffect(() => {
     if (step === 3) {
       const timer = setTimeout(() => {
@@ -232,7 +226,6 @@ function UpdatePasswordModal({ onClose }) {
     <div className="fixed inset-0 z-[400] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center">
@@ -246,7 +239,6 @@ function UpdatePasswordModal({ onClose }) {
         </div>
 
         <div className="p-6">
-          {/* Step indicator — 2 steps */}
           {step < 3 && (
             <div className="flex items-center gap-2 mb-6">
               {[1, 2].map(s => (
@@ -260,7 +252,6 @@ function UpdatePasswordModal({ onClose }) {
 
           {err && <div className="flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 rounded-xl px-4 py-3 text-sm font-medium mb-4"><AlertCircle size={15} className="flex-shrink-0" />{err}</div>}
 
-          {/* ── Step 1: Username + current password ── */}
           {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <p className="text-sm text-slate-500">Enter your username and current password. An OTP will be sent to your registered email.</p>
@@ -268,14 +259,14 @@ function UpdatePasswordModal({ onClose }) {
                 <label className={labelCls}>Username</label>
                 <div className="relative">
                   <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input className={inputCls + " pl-10"} value={username} onChange={e => setUsername(e.target.value)} placeholder="Your username" required autoFocus />
+                  <input className={inputCls + " pl-10"} value={username} onChange={e => setUsername(e.target.value)} placeholder="Your username"  autoFocus />
                 </div>
               </div>
               <div>
                 <label className={labelCls}>Current Password</label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input className={inputCls + " pl-10 pr-11"} type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Your current password" required />
+                  <input className={inputCls + " pl-10 pr-11"} type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Your current password"  />
                   <button type="button" onClick={() => setShowCurrent(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">{showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                 </div>
               </div>
@@ -288,7 +279,6 @@ function UpdatePasswordModal({ onClose }) {
             </form>
           )}
 
-          {/* ── Step 2: OTP + new password + confirm — all in one form ── */}
           {step === 2 && (
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 flex items-center gap-2">
@@ -296,36 +286,33 @@ function UpdatePasswordModal({ onClose }) {
                 <p className="text-sm text-purple-700">OTP sent to your registered email</p>
               </div>
 
-              {/* OTP */}
               <div>
                 <label className={labelCls}>Enter OTP</label>
                 <div className="relative">
                   <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input className={inputCls + " pl-10 text-center tracking-[0.5em] text-xl font-bold"}
                     value={otpInput}
-                    onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    placeholder="• • • • • •" required autoFocus />
+                    onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="• • • •"  autoFocus />
                 </div>
               </div>
 
               <div className="border-t border-slate-100" />
 
-              {/* New password */}
               <div>
                 <label className={labelCls}>New Password</label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input className={inputCls + " pl-10 pr-11"} type={showNew ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters" required />
+                  <input className={inputCls + " pl-10 pr-11"} type={showNew ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters"  />
                   <button type="button" onClick={() => setShowNew(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">{showNew ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                 </div>
               </div>
 
-              {/* Confirm password */}
               <div>
                 <label className={labelCls}>Confirm Password</label>
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input className={inputCls + " pl-10 pr-11"} type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat new password" required />
+                  <input className={inputCls + " pl-10 pr-11"} type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat new password"  />
                   <button type="button" onClick={() => setShowConfirm(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">{showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && <p className="text-xs text-red-500 mt-1.5 ml-1">Passwords do not match.</p>}
@@ -347,7 +334,6 @@ function UpdatePasswordModal({ onClose }) {
             </form>
           )}
 
-          {/* ── Step 3: Success — auto redirects ── */}
           {step === 3 && (
             <div className="text-center py-4">
               <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mx-auto mb-4">
@@ -367,7 +353,7 @@ function UpdatePasswordModal({ onClose }) {
   );
 }
 
-/* ── Navbar ──────────────────────────────────────────────────── */
+/*Navbar  */
 export default function Navbar() {
   const { user, logout, isOwner } = useAuth();
   const navigate = useNavigate();
@@ -389,7 +375,6 @@ export default function Navbar() {
 
         <div className="w-10 flex-shrink-0 md:hidden" />
 
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 md:gap-3 no-underline group">
           <div className="w-9 h-9 md:w-14 md:h-14 rounded-full border-2 border-teal-100 p-0.5 flex items-center justify-center transition-transform group-hover:scale-105 bg-white">
             <img src="/logo.png" alt="IMS" className="w-full h-full rounded-full object-cover" />
@@ -403,7 +388,6 @@ export default function Navbar() {
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           {user ? (
             <>
-              {/* User dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(o => !o)}
@@ -422,8 +406,6 @@ export default function Navbar() {
                   <>
                     <div className="fixed inset-0 z-[55]" onClick={() => setMenuOpen(false)} />
                     <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 shadow-2xl rounded-2xl z-[60] overflow-hidden">
-
-                      {/* User info */}
                       <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
                         <div className="w-11 h-11 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
                           {user.fullName?.charAt(0).toUpperCase()}
@@ -435,7 +417,6 @@ export default function Navbar() {
                         </div>
                       </div>
 
-                      {/* GST — owner only */}
                       {isOwner && (
                         <div className="px-5 py-3 border-b border-slate-100">
                           <div className="flex items-center gap-2">
@@ -445,7 +426,6 @@ export default function Navbar() {
                         </div>
                       )}
 
-                      {/* Actions — owner only */}
                       {isOwner && (
                         <div className="px-3 py-2">
                           <button onClick={() => openModal('profile')}
@@ -466,7 +446,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Logout — outside dropdown */}
               <button
                 onClick={handleLogout}
                 className="text-[11px] md:text-[13px] font-bold text-teal-600 border-2 border-teal-600 rounded-xl px-2.5 py-1 md:px-5 md:py-2 hover:bg-teal-600 hover:text-white active:scale-95 transition-all shadow-sm">
