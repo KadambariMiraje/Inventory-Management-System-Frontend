@@ -73,7 +73,8 @@ export default function Transactions() {
   const hasDateFilter  = dateFrom || dateTo;
 
   // ── XLSX Download ─────────────────────────────────────────────
-  const downloadXLSX = () => {
+  const 
+  downloadXLSX = () => {
     setDownloading(true);
 
     const generate = () => {

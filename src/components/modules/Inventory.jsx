@@ -357,7 +357,7 @@ export default function Inventory() {
             {filtered.map(product => {
               const isOpen   = !!expanded[product.productCode];
               const totalQty = product.totalQuantity || 0;
-              const isLow    = totalQty <= (product.minStockLevel || 0);
+              const isLow    = totalQty = (product.minStockLevel || 0);
               return (
                 <div key={product.productCode} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
