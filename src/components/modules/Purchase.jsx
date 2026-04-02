@@ -9,10 +9,12 @@ import {
 
 const EMPTY_FORM = {
   batchNo:       '',
+  // purchaseName:  '',
   currQuantity:  '',
   purchasePrice: '',
   partyName:     '',
   expiryDate:    '',
+  // location:      '',
 };
 
 export default function Purchase() {
@@ -90,9 +92,11 @@ export default function Purchase() {
         category:      selectedCat,
         productName:   selectedProd,
         batchNo:       form.batchNo.trim(),
+        // purchaseName: form.purchaseName.trim(),
         currQuantity:  parseFloat(form.currQuantity),
         purchasePrice: parseFloat(form.purchasePrice),
         partyName:     form.partyName.trim(),
+        // location:   form.location.trim(),
         expiryDate:    hasExpiry ? form.expiryDate : null,
       };
       const res = await batchAPI.purchase(payload);
@@ -160,7 +164,7 @@ export default function Purchase() {
                   <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
-
+ 
               <div>
                 <label className={labelCls}>Product Name</label>
                 <div className="relative">
@@ -200,6 +204,14 @@ export default function Purchase() {
 
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          
+                {/* Purchase Name  */}
+               {/* <label className={labelCls}>Purchase Name</label>
+                 <input type='text' name='purchaseName' className={inputCls} 
+                 value={form.purchaseName} onChange={handleChange}
+                 placeholder='e.g. Pre-00001' required disbaled={submitting} />
+                 */}
+            
               <div>
                 <label className={labelCls}>Batch No</label>
                 <input type="text" name="batchNo" className={inputCls}
@@ -219,6 +231,7 @@ export default function Purchase() {
             </div>
 
             <div className="mb-4">
+              {/* Purchase Price Per Unit */}
               <label className={labelCls}>Batch Purchase Price (₹)</label>
               <input type="number" name="purchasePrice" className={inputCls}
                 value={form.purchasePrice} onChange={handleChange}
@@ -226,12 +239,21 @@ export default function Purchase() {
                 required disabled={submitting} />
             </div>
 
+            {/* location added */}
+            {/* <div className="mb-4">
+              <label className={labelCls}>Location</label>
+              <input type="text" name="location" className={inputCls}
+                value={form.location} onChange={handleChange}
+                placeholder="e.g. Desk No 1 " disabled={submitting} />
+            </div> */}
+
             <div className="mb-4">
               <label className={labelCls}>Supplier Name</label>
               <input type="text" name="partyName" className={inputCls}
                 value={form.partyName} onChange={handleChange}
                 placeholder="e.g. Supplier / Vendor name" disabled={submitting} />
             </div>
+
 
             <div className="bg-white border border-slate-200 rounded-2xl p-4">
               <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -267,7 +289,7 @@ export default function Purchase() {
               )}
             </div>
           </div>
-
+  
           <button type="submit" disabled={submitting}
             className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
             {submitting

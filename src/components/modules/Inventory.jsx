@@ -12,7 +12,7 @@ const DEFAULT_CATEGORIES = [
   'Clothing', 'Stationery', 'Grocery', 'Other',
 ];
 
-/* ── Confirm dialog ──────────────────────────────────────────── */
+/*  Confirm dialog */
 function ConfirmDialog({ message, onConfirm, onCancel, isDeactivate }) {
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
@@ -43,7 +43,7 @@ function ConfirmDialog({ message, onConfirm, onCancel, isDeactivate }) {
   );
 }
 
-/* ── Edit Product modal ──────────────────────────────────────── */
+/*  Edit Product modal */
 function EditProductModal({ product, onSave, onClose }) {
   const [form, setForm] = useState({
     productName:   product.productName   || '',
@@ -145,7 +145,7 @@ function EditProductModal({ product, onSave, onClose }) {
   );
 }
 
-/* ── Edit Batch modal ────────────────────────────────────────── */
+/*  Edit Batch modal */
 function EditBatchModal({ batch, onSave, onClose }) {
   const [form, setForm] = useState({
     batchNumber:     batch.batchNumber     || '',
@@ -221,7 +221,7 @@ function EditBatchModal({ batch, onSave, onClose }) {
   );
 }
 
-/* ── Main Inventory component ────────────────────────────────── */
+/*  Main Inventory component  */
 export default function Inventory() {
   const { user, token, loading: authLoading, isOwner } = useAuth();
   const navigate = useNavigate();

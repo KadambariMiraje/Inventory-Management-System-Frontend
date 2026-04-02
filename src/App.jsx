@@ -17,7 +17,7 @@ import HeroPage from "./pages/HeroPage";
 import Inventory from "./components/modules/Inventory";
 import LowStock from "./components/modules/LowStock";
 import ExpiringItems from "./components/modules/ExpiringItems";
-import Transcations from "./components/modules/Transcations";
+import Transactions from "./components/modules/Transcations";
 import ProductHistory from "./pages/ProductHistory";
 
 function App() {
@@ -39,7 +39,7 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={["ROLE_OWNER"]} />}>
                 <Route path="add-product"  element={<AddProduct/>} />
-                <Route path="/dashboard/staff" element={<StaffPage />} />
+                <Route path="staff" element={<StaffPage />} />
               </Route>
 
               
@@ -48,7 +48,7 @@ function App() {
               <Route path="sale" element={<Sale/>} />
               <Route path="low-stock" element={<LowStock/>} />
               <Route path="expiring" element={<ExpiringItems/>} />
-              <Route path="transactions" element={<Transcations/>} />
+              <Route path="transactions" element={<Transactions/>} />
               
               <Route path="inventory/history/:productCode" element={<ProductHistory />} />
 

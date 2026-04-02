@@ -329,7 +329,7 @@ export default function StaffPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {staffList.map(staff => (
-            <StaffCard key={staff.username} staff={staff} onDelete={setDeleteTarget} />
+            <StaffCard key={staff.id} staff={staff} onDelete={setDeleteTarget} />
           ))}
         </div>
       )}

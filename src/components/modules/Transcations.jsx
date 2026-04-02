@@ -72,7 +72,7 @@ export default function Transactions() {
   const clearDateRange = () => { setDateFrom(''); setDateTo(''); };
   const hasDateFilter  = dateFrom || dateTo;
 
-  // ── XLSX Download ─────────────────────────────────────────────
+  //  XLSX Download 
   const 
   downloadXLSX = () => {
     setDownloading(true);

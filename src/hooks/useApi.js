@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://65-2-189-227.nip.io/api';
-// const BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.169:8083/api';
+// const BASE_URL = import.meta.env.VITE_API_URL || 'https://65-2-189-227.nip.io/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://10.29.70.131:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -28,47 +28,42 @@ api.interceptors.response.use(
 export const authAPI = {
   register: (data) => api.post('/user/signup', data),
   login:    (data) => api.post('/user/login', data),
-
-  sendOtp:       ()     => api.get('/user/sendotp'),
-  updateProfile:     (data) => api.post('/user/updateuser', data),
-  verifyPasswordOtp: (data) => api.post('/user/verifypasswordforotp', data),
-  updatePassword:    (data) => api.post('/user/updatepassword', data),
-
-  forgotByUsername: (username) => api.get(`/user/forgetpassword/username/sendotp/${username}`),
-  forgotByEmail:    (email)    => api.get(`/user/forgetpassword/email/sendotp/${email}`),
-  resetPasswordByUsername:    (data)     => api.post('/user/forgetpassword/username/recoveraccount', data),
-  resetPasswordByEmail:    (data)     => api.post('/user/forgetpassword/email/recoveraccount', data),
+  sendOtp:       ()     => api.get('/user'),
+  updateProfile:     (data) => api.put('/user', data),
+  verifyPasswordOtp: (data) => api.post('/user/otp', data),
+  updatePassword:    (data) => api.put('/user/password', data),
+  forgotByUsername: (username) => api.get(`/user/username/otp/${username}`),
+  forgotByEmail:    (email)    => api.get(`/user/email/otp/${email}`),
+  resetPasswordByUsername:    (data)     => api.put('/user/username', data),
+  resetPasswordByEmail:    (data)     => api.put('/user/email', data),
 };
 
 export const productAPI = {
-  getAll:           ()           => api.get('/product'),
-  getById:          (id)         => api.get(`/product/${id}`),
-  addProduct:       (data)       => api.post('/product/addproduct', data),
-  update:           (id, data)      => api.put(`/product/${id}`, data),
-  getCategories:    ()           => api.get('/product/getcategory'),
-  getByCategory:    (cat)        => api.post(`/product/getproductname/${encodeURIComponent(cat)}`),
+  addProduct:       (data)       => api.post('/product', data),
+  getCategories:    ()           => api.get('/product/categories'),
+  getByCategory:    (cat)        => api.get(`/product/${encodeURIComponent(cat)}`),
   getLowStock:      ()           => api.get('/product/lowstockitems'),
-  getAllWithBatches: ()           => api.get('/product/allproducts'),
-  getProductUnit: (name)          => api.post(`/product/getunit/${encodeURIComponent(name)}`),
-  editProduct:      (code, data) => api.put('/product/updateproduct', { productCode: code, ...data }),
-  deleteProduct:    (code)       => api.delete(`/product/deleteproduct/${code}`),
+  getAllWithBatches: ()           => api.get('/product'),
+  getProductUnit: (name)          => api.get(`/product/unit/${encodeURIComponent(name)}`),
+  editProduct:      (code, data) => api.put('/product', { productCode: code, ...data }),
+  deleteProduct:    (code)       => api.delete(`/product/${code}`),
 };
 
 export const batchAPI = {
-  purchase:    (data)       => api.post('/product/addbatch', data),
-  editBatch:   (id, data)   => api.put('/product/updatebatch', { id, ...data }),
-  deleteBatch: (id)         => api.delete(`/product/deletebatch/${id}`),
+  purchase:    (data)       => api.post('/product/batch', data),
+  editBatch:   (id, data)   => api.put('/product/batch', { id, ...data }),
+  deleteBatch: (id)         => api.delete(`/product/batch/${id}`),
   getExpiring: (days)       => api.get('/product/expiryitems'),
 };
 
 export const staffAPI = {
-  add:    (data)     => api.post('/staff/addstaff', data),
-  getAll: ()         => api.get('/staff/getstaff'),
-  delete: (id) => api.delete(`/staff/deletestaff/${id}`),
+  add:    (data)     => api.post('/staff', data),
+  getAll: ()         => api.get('/staff'),
+  delete: (id) => api.delete(`/staff/${id}`),
 };
 
 export const transactionAPI = {
-  getAll: (params) => api.get('/transaction/alltransactions', { params }),
+  getAll: (params) => api.get('/transaction', { params }),
   sale:   (data)   => api.post('/product/sale', data),
 };
 
