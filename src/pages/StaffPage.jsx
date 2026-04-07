@@ -6,7 +6,6 @@ import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, RefreshCw,
 } from 'lucide-react';
 
-/*  Add Staff Modal  */
 function AddStaffModal({ onClose, onAdded }) {
   const [step,            setStep]            = useState(1);
   const [username,        setUsername]        = useState('');

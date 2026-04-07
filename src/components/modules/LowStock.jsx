@@ -53,7 +53,6 @@ export default function LowStock() {
   return (
     <div>
 
-      {/* Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-amber-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-100">
@@ -71,14 +70,12 @@ export default function LowStock() {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium bg-red-50 text-red-800 border border-red-200">
           <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />{error}
         </div>
       )}
 
-      {/* Summary banner */}
       {!fetching && !error && (
         <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-2xl px-5 py-4 mb-5 border ${
           products.length === 0 ? 'bg-teal-50 border-teal-200' : 'bg-amber-50 border-amber-200'
@@ -107,7 +104,6 @@ export default function LowStock() {
         </div>
       )}
 
-      {/* Search */}
       {!fetching && products.length > 0 && (
         <div className="relative mb-5">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -130,7 +126,7 @@ export default function LowStock() {
         </div>
       ) : products.length > 0 ? (
         <>
-          {/* ── MOBILE ── */}
+          {/* MOBILE */}
           <div className="md:hidden space-y-3">
             {filtered.map((product, idx) => {
               const currentStock = product.totalQuantity || 0;
@@ -174,7 +170,7 @@ export default function LowStock() {
             })}
           </div>
 
-          {/* ── DESKTOP ── */}
+          {/* DESKTOP  */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">

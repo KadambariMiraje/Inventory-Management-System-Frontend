@@ -35,36 +35,29 @@ export default function AddProduct() {
     if (!loading && (!user || !token)) navigate('/login');
   }, [user, token, loading, navigate]);
 
-  // ── Auto-generate code on mount ──────────────────────────────
   const generateAndVerifyCode = useCallback(async () => {
     setGeneratingCode(true);
     setCodeStatus(null);
     try {
-      // Step 1 — generate a code from backend
       const genRes = await productAPI.generateProductCode();
       const code = genRes.data;
 
-      // Step 2 — check if it already exists
       const checkRes = await productAPI.checkProductCode(code);
-      const exists = checkRes.data; // true or false
+      const exists = checkRes.data;
 
       if (exists) {
-        // Code taken — generate again automatically (recursive)
         await generateAndVerifyCode();
       } else {
-        // Code is free — set it in form
         setForm(prev => ({ ...prev, productCode: code }));
         setCodeStatus('available');
       }
     } catch {
       setCodeStatus(null);
-      // If generation fails, leave field empty for manual entry
     } finally {
       setGeneratingCode(false);
     }
   }, []);
 
-  // Run once when component mounts and user is authenticated
   useEffect(() => {
     if (!loading && user && token) {
       generateAndVerifyCode();
@@ -79,7 +72,6 @@ export default function AddProduct() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    // If user manually edits the product code, clear status
     if (e.target.name === 'productCode') setCodeStatus(null);
   };
 
@@ -110,7 +102,6 @@ export default function AddProduct() {
       setForm(EMPTY_FORM);
       setIsCustomCat(false); setCustomCat('');
       setCodeStatus(null);
-      // Auto-generate new code for next product
       generateAndVerifyCode();
     } catch (err) {
       setMsg({ type: 'error', text: typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to add product. Please try again.' });
@@ -152,7 +143,6 @@ export default function AddProduct() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            {/* Product Code — auto-generated with regenerate button */}
             <div>
               <label className={labelCls}>Product Code</label>
               <div className="relative flex gap-2">
@@ -167,16 +157,16 @@ export default function AddProduct() {
                     required
                     readOnly
                   />
-                  {/* Available tick inside input */}
+
                   {codeStatus === 'available' && !generatingCode && (
                     <CheckCircle size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
                   )}
-                  {/* Spinner inside input while generating */}
+                  
                   {generatingCode && (
                     <Loader2 size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-400 animate-spin pointer-events-none" />
                   )}
                 </div>
-                {/* Regenerate button */}
+                
                 <button
                   type="button"
                   onClick={generateAndVerifyCode}

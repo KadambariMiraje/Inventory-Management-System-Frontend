@@ -72,7 +72,6 @@ export default function Transactions() {
   const clearDateRange = () => { setDateFrom(''); setDateTo(''); };
   const hasDateFilter  = dateFrom || dateTo;
 
-  //  XLSX Download 
   const 
   downloadXLSX = () => {
     setDownloading(true);
@@ -91,7 +90,6 @@ export default function Transactions() {
           return new Date(dateStr).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         };
 
-        // Build rows
         const headers = ['#', 'Type', 'Product', 'Code', 'Category', 'Quantity', 'Units', 'Amount (₹)', 'Party', 'Date', 'Time'];
 
         const rows = filtered.map((txn, idx) => [
@@ -108,7 +106,6 @@ export default function Transactions() {
           formatTime(txn.transactionDate),
         ]);
 
-        // Summary rows at top
         const tSales     = filtered.filter(t => t.type === 'SALE').length;
         const tPurchases = filtered.filter(t => t.type === 'PURCHASE').length;
         const tAmt       = filtered.reduce((s, t) => s + (t.totalAmount || 0), 0);
@@ -126,7 +123,6 @@ export default function Transactions() {
 
         const ws = XLSX.utils.aoa_to_sheet(summaryRows);
 
-        // Column widths
         ws['!cols'] = [
           { wch: 4  },  // #
           { wch: 12 },  // Type
@@ -152,7 +148,6 @@ export default function Transactions() {
       }
     };
 
-    // Load SheetJS once, then generate
     if (window.XLSX) {
       generate();
     } else {
@@ -183,7 +178,6 @@ export default function Transactions() {
   return (
     <div>
 
-      {/* Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
@@ -195,7 +189,7 @@ export default function Transactions() {
           </div>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          {/* Download XLSX */}
+
           <button onClick={downloadXLSX} disabled={downloading || fetching || filtered.length === 0}
             className="flex items-center gap-2 text-base font-semibold text-teal-600 border-2 border-teal-200 hover:border-teal-400 bg-teal-50 hover:bg-teal-100 px-4 py-2.5 rounded-xl transition-all disabled:opacity-50">
             {downloading
@@ -203,7 +197,7 @@ export default function Transactions() {
               : <Download size={16} />}
             <span className="hidden sm:inline">Download Excel</span>
           </button>
-          {/* Refresh */}
+
           <button onClick={fetchTransactions} disabled={fetching}
             className="flex items-center gap-2 text-base font-semibold text-teal-600 border-2 border-teal-200 hover:border-teal-400 bg-teal-50 hover:bg-teal-100 px-4 py-2.5 rounded-xl transition-all disabled:opacity-50">
             <RefreshCw size={16} className={fetching ? 'animate-spin' : ''} />
@@ -212,14 +206,12 @@ export default function Transactions() {
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium bg-red-50 text-red-800 border border-red-200">
           <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />{error}
         </div>
       )}
 
-      {/* Summary cards */}
       {!fetching && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
@@ -243,10 +235,8 @@ export default function Transactions() {
         </div>
       )}
 
-      {/* Filters */}
       <div className="flex flex-col gap-3 mb-5">
 
-        {/* Row 1 — Search + Type */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -275,7 +265,6 @@ export default function Transactions() {
           </div>
         </div>
 
-        {/* Row 2 — Date range */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Calendar size={16} className="text-slate-400" />
@@ -311,7 +300,6 @@ export default function Transactions() {
 
       </div>
 
-      {/* Content */}
       {fetching ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={32} className="animate-spin text-teal-600" />
@@ -328,7 +316,7 @@ export default function Transactions() {
         </div>
       ) : (
         <>
-          {/* ── MOBILE: card layout ─────────────────────────────── */}
+          {/* MOBILE: card layout */}
           <div className="md:hidden space-y-3">
             {filtered.map((txn, idx) => {
               const isSale = txn.type === 'SALE';
@@ -362,7 +350,7 @@ export default function Transactions() {
             })}
           </div>
 
-          {/* ── DESKTOP: table layout ────────────────────────────── */}
+          {/* DESKTOP: table layout */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
