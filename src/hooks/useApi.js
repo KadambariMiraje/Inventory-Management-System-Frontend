@@ -57,7 +57,7 @@ export const batchAPI = {
   purchase:    (data)       => api.post('/product/batch', data),
   editBatch:   (id, data)   => api.put('/product/batch', { id, ...data }),
   deleteBatch: (id)         => api.delete(`/product/batch/${id}`),
-  getExpiring: (days)       => api.get('/product/expiryitems'),
+  getExpiring: ()       => api.get('/product/expiryitems'),
 };
 
 export const staffAPI = {
@@ -67,7 +67,7 @@ export const staffAPI = {
 };
 
 export const transactionAPI = {
-  getAll: (params) => api.get('/transaction', { params }),
+  getAll: () => api.get('/transaction'),
   sale:   (data)   => api.post('/product/sale', data),
 };
 

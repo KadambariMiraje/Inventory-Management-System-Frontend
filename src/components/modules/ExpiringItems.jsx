@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { batchAPI } from '../../hooks/useApi';
 import {
   Clock, RefreshCw, Search, Loader2,
-  X, ShoppingBag, AlertTriangle, CheckCircle,
+  X, Trash2, AlertTriangle, CheckCircle,
 } from 'lucide-react';
 
 function daysUntilExpiry(dateStr) {
@@ -24,13 +24,15 @@ export default function ExpiringItems() {
   const { user, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [allItems, setAllItems] = useState([]);
-  const [items,    setItems]    = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [search,   setSearch]   = useState('');
-  const [tab,      setTab]      = useState('expiring'); 
-  const [fetching, setFetching] = useState(true);
-  const [error,    setError]    = useState('');
+  const [allItems,     setAllItems]     = useState([]);
+  const [items,        setItems]        = useState([]);
+  const [filtered,     setFiltered]     = useState([]);
+  const [search,       setSearch]       = useState('');
+  const [tab,          setTab]          = useState('expiring');
+  const [fetching,     setFetching]     = useState(true);
+  const [error,        setError]        = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting,     setDeleting]     = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || !token)) navigate('/login');
@@ -39,7 +41,6 @@ export default function ExpiringItems() {
   const fetchData = useCallback(async () => {
     setFetching(true); setError('');
     try {
-
       const res = await batchAPI.getExpiring();
       setAllItems(res.data || []);
     } catch {
@@ -73,6 +74,20 @@ export default function ExpiringItems() {
     ));
   }, [search, items]);
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await batchAPI.deleteBatch(deleteTarget.id);
+      setAllItems(prev => prev.filter(b => b.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch {
+      setError('Failed to delete batch.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (authLoading) return null;
 
   const thCls = "px-4 py-3 text-left text-sm font-bold text-white uppercase tracking-wide whitespace-nowrap";
@@ -82,7 +97,6 @@ export default function ExpiringItems() {
 
   return (
     <div>
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-100">
@@ -162,7 +176,7 @@ export default function ExpiringItems() {
         </div>
       ) : (
         <>
-
+          {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {filtered.map((batch, idx) => {
               const d          = daysUntilExpiry(batch.expiryDate);
@@ -185,19 +199,19 @@ export default function ExpiringItems() {
                       <span className="text-slate-400">Expiry: </span>
                       <span className={`font-semibold ${isExpired ? 'text-red-600' : isCritical ? 'text-amber-700' : 'text-slate-700'}`}>{batch.expiryDate ?? '—'}</span>
                     </div>
-                    <div><span className="text-slate-400">Location: </span><span className="font-semibold text-slate-700">{batch.location || 'N/A'}</span></div> 
+                    <div><span className="text-slate-400">Location: </span><span className="font-semibold text-slate-700">{batch.location || 'N/A'}</span></div>
                   </div>
-                  
-
-                  <button onClick={() => navigate('/dashboard/purchase')}
-                    className="w-full flex items-center justify-center gap-1.5 text-sm font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 py-2 rounded-xl transition-colors">
-                    <ShoppingBag size={14} />Restock
+                  <button
+                    onClick={() => setDeleteTarget({ id: batch.id, productName: batch.productName, batchNumber: batch.batchNumber })}
+                    className="w-full flex items-center justify-center gap-1.5 text-sm font-bold text-red-700 bg-red-100 hover:bg-red-200 py-2 rounded-xl transition-colors">
+                    <Trash2 size={14} />Delete
                   </button>
                 </div>
               );
             })}
           </div>
 
+          {/* Desktop table */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
@@ -238,9 +252,10 @@ export default function ExpiringItems() {
                         <td className="px-4 py-3">{d !== null ? <StatusBadge days={d} /> : <span className="text-sm text-slate-400">—</span>}</td>
                         <td className="px-4 py-3"><span className="text-sm text-slate-700">{batch.location || 'N/A'}</span></td>
                         <td className="px-4 py-3">
-                          <button onClick={() => navigate('/dashboard/purchase')}
-                            className="flex items-center gap-1.5 text-sm font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap">
-                            <ShoppingBag size={14} />Restock
+                          <button
+                            onClick={() => setDeleteTarget({ id: batch.id, productName: batch.productName, batchNumber: batch.batchNumber })}
+                            className="flex items-center gap-1.5 text-sm font-bold text-red-700 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap">
+                            <Trash2 size={14} />Delete
                           </button>
                         </td>
                       </tr>
@@ -251,6 +266,36 @@ export default function ExpiringItems() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <Trash2 size={18} className="text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Delete Purchase</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-3">Are you sure you want to delete this purchase? This action cannot be undone.</p>
+            <div className="bg-slate-50 rounded-xl p-3 mb-5 text-sm space-y-1">
+              <p><span className="text-slate-400">Product: </span><span className="font-semibold text-slate-800">{deleteTarget.productName}</span></p>
+              <p><span className="text-slate-400">Purchase Order No: </span><span className="font-mono font-semibold text-teal-700">{deleteTarget.batchNumber}</span></p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteTarget(null)} disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={handleDelete} disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
