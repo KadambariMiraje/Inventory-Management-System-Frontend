@@ -172,38 +172,14 @@ export default function ProductHistory() {
               <p className="text-xs text-slate-400 mt-0.5">{unit}</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-purple-500 p-4 shadow-sm col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <IndianRupee size={15} className="text-purple-600" />
-                </div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Revenue</p>
-              </div>
-              <p className="text-2xl font-bold text-purple-700">₹{totalRevenue.toFixed(2)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">from sales</p>
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Total Spent</p>
-              <p className="text-xl font-bold text-slate-800">₹{totalSpent.toFixed(2)}</p>
-              <p className="text-xs text-slate-400">on purchases</p>
-            </div>
             <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Transactions</p>
               <p className="text-xl font-bold text-slate-800">{transactions.length}</p>
               <p className="text-xs text-slate-400">{transactions.filter(t=>t.type==='PURCHASE').length} purchases · {transactions.filter(t=>t.type==='SALE').length} sales</p>
             </div>
-            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 col-span-2 sm:col-span-1">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Profit/Loss</p>
-              <p className={`text-xl font-bold ${totalRevenue - totalSpent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ₹{(totalRevenue - totalSpent).toFixed(2)}
-              </p>
-              <p className="text-xs text-slate-400">revenue minus purchase cost</p>
-            </div>
+
           </div>
+
 
           {chartData.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 mb-6">

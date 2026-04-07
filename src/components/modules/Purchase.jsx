@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useCallback} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, batchAPI } from '../../hooks/useApi';
 import {
   ShoppingBag, CheckCircle, AlertCircle,
-  Loader2, ChevronDown, Calendar,
+  Loader2, ChevronDown, Calendar, RefreshCw
 } from 'lucide-react';
 
 const EMPTY_FORM = {
-  batchNo:       '',
-  // purchaseName:  '',
+  purchaseOrderNo:  '',
   currQuantity:  '',
   purchasePrice: '',
   partyName:     '',
+  location:      '',
   expiryDate:    '',
-  // location:      '',
 };
 
 export default function Purchase() {
@@ -29,6 +28,9 @@ export default function Purchase() {
   const [selectedProd, setSelectedProd] = useState(prefill.productName || '');
   const [productUnit,  setProductUnit]  = useState('');  
   const [loadingUnit,  setLoadingUnit]  = useState(false);
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [codeStatus, setCodeStatus]       = useState(null); 
+  
 
   const [form,      setForm]      = useState(EMPTY_FORM);
   const [hasExpiry, setHasExpiry] = useState(false);
@@ -71,6 +73,33 @@ export default function Purchase() {
       .finally(() => setLoadingUnit(false));
   }, [selectedProd]);
 
+  // Auto-generate code on mount
+    const generateAndVerifyCode = useCallback(async () => {
+      setGeneratingCode(true);
+      setCodeStatus(null);
+      try {
+        const genRes = await productAPI.generatePurchaseOrderCode();
+        const code = genRes.data;
+
+        const checkRes = await productAPI.checkPurchaseOrderCode(code);
+        const exists = checkRes.data; 
+  
+        if (exists) {
+          await generateAndVerifyCode();
+        } else {
+          setForm(prev => ({ ...prev, purchaseOrderNo: code }));
+          setCodeStatus('available');
+        }
+      } catch {
+        setCodeStatus(null);
+        setForm(prev => ({ ...prev, purchaseOrderNo: '' }));
+      } finally {
+        setGeneratingCode(false);
+      }
+    }, []);
+
+  
+
   useEffect(() => {
     if (!hasExpiry) setForm(f => ({ ...f, expiryDate: '' }));
   }, [hasExpiry]);
@@ -90,13 +119,12 @@ export default function Purchase() {
     try {
       const payload = {
         category:      selectedCat,
-        productName:   selectedProd,
-        batchNo:       form.batchNo.trim(),
-        // purchaseName: form.purchaseName.trim(),
-        currQuantity:  parseFloat(form.currQuantity),
+        productName:   selectedProd,            
+        batchNumber : form.purchaseOrderNo.trim(),
+        currentQuantity:  parseFloat(form.currQuantity),
         purchasePrice: parseFloat(form.purchasePrice),
         partyName:     form.partyName.trim(),
-        // location:   form.location.trim(),
+        location:      form.location.trim(),
         expiryDate:    hasExpiry ? form.expiryDate : null,
       };
       const res = await batchAPI.purchase(payload);
@@ -106,6 +134,8 @@ export default function Purchase() {
       setSelectedProd('');
       setSelectedCat('');
       setProductUnit('');
+      setCodeStatus(null);
+      
     } catch (err) {
       const errData = err.response?.data;
       const errText = typeof errData === 'string'
@@ -130,7 +160,7 @@ export default function Purchase() {
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Purchase Stock</h3>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Add new batch stock for a product</p>
+          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Add new stock for a product</p>
         </div>
       </div>
 
@@ -204,20 +234,42 @@ export default function Purchase() {
 
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          
-                {/* Purchase Name  */}
-               {/* <label className={labelCls}>Purchase Name</label>
-                 <input type='text' name='purchaseName' className={inputCls} 
-                 value={form.purchaseName} onChange={handleChange}
-                 placeholder='e.g. Pre-00001' required disbaled={submitting} />
-                 */}
-            
-              <div>
-                <label className={labelCls}>Batch No</label>
-                <input type="text" name="batchNo" className={inputCls}
-                  value={form.batchNo} onChange={handleChange}
-                  placeholder="e.g. BATCH-001" required disabled={submitting} />
+
+            <div>
+              <label className={labelCls}>Purchase Order Number</label>
+              <div className="relative flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    name="purchaseOrderNo"
+                    className={inputCls + (codeStatus === 'available' ? ' border-teal-400 pr-8' : '')}
+                    value={form.purchaseOrderNo}
+                    onChange={handleChange}
+                    placeholder={generatingCode ? 'Generating…' : 'e.g. PUR-12345'}
+                    required
+                    readOnly
+                  />
+                  
+                  {codeStatus === 'available' && !generatingCode && (
+                    <CheckCircle size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
+                  )}
+                 
+                  {generatingCode && (
+                    <Loader2 size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-400 animate-spin pointer-events-none" />
+                  )}
+                </div>
+              
+                <button
+                  type="button"
+                  onClick={generateAndVerifyCode}
+                  disabled={submitting || generatingCode}
+                  title="Generate new code"
+                  className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-400 hover:text-teal-600 hover:border-teal-400 transition-all disabled:opacity-50">
+                  <RefreshCw size={15} className={generatingCode ? 'animate-spin' : ''} />
+                </button>
               </div>
+            </div>
+          
               <div>
                 <label className={labelCls}>
                   Quantity
@@ -231,21 +283,13 @@ export default function Purchase() {
             </div>
 
             <div className="mb-4">
-              {/* Purchase Price Per Unit */}
-              <label className={labelCls}>Batch Purchase Price (₹)</label>
+              
+              <label className={labelCls}>Purchase Price Per Quantity (₹)</label>
               <input type="number" name="purchasePrice" className={inputCls}
                 value={form.purchasePrice} onChange={handleChange}
                 placeholder="e.g. 500.00" step="0.01" min="0"
                 required disabled={submitting} />
             </div>
-
-            {/* location added */}
-            {/* <div className="mb-4">
-              <label className={labelCls}>Location</label>
-              <input type="text" name="location" className={inputCls}
-                value={form.location} onChange={handleChange}
-                placeholder="e.g. Desk No 1 " disabled={submitting} />
-            </div> */}
 
             <div className="mb-4">
               <label className={labelCls}>Supplier Name</label>
@@ -253,7 +297,13 @@ export default function Purchase() {
                 value={form.partyName} onChange={handleChange}
                 placeholder="e.g. Supplier / Vendor name" disabled={submitting} />
             </div>
-
+ 
+            <div className="mb-4">
+              <label className={labelCls}>Location</label>
+              <input type="text" name="location" className={inputCls}
+                value={form.location} onChange={handleChange}
+                placeholder="e.g. Desk No 1 " disabled={submitting} />
+            </div> 
 
             <div className="bg-white border border-slate-200 rounded-2xl p-4">
               <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -273,7 +323,7 @@ export default function Purchase() {
                 </div>
                 <div>
                   <span className="text-sm font-semibold text-slate-700">This product has an expiry date</span>
-                  <p className="text-xs text-slate-400 mt-0.5">Check this if the batch expires</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Check this if the product expires</p>
                 </div>
               </label>
               {hasExpiry && (

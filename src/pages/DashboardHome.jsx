@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardHome() {
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, token, loading: authLoading  , isOwner } = useAuth();
   const navigate = useNavigate();
 
   const [stats,      setStats]      = useState(null);
@@ -119,13 +119,15 @@ export default function DashboardHome() {
             })}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 sm:mb-8">
+          <div  className={`grid grid-cols-2 ${
+                  isOwner ? 'sm:grid-cols-4' : 'sm:grid-cols-3'
+                } gap-3 mb-6 sm:mb-8`}>
             {[
-              { label: 'Add Product',   icon: Package,     path: '/dashboard/add-product', color: 'teal'   },
+              { label: 'Add Product',   icon: Package,     path: '/dashboard/add-product', color: 'teal'  , ownerOnly: true },
               { label: 'Purchase',      icon: ShoppingBag, path: '/dashboard/purchase',    color: 'teal'   },
               { label: 'Sale',          icon: TrendingUp,  path: '/dashboard/sale',        color: 'green'  },
               { label: 'Low Stock',     icon: AlertTriangle, path: '/dashboard/low-stock', color: 'amber'  },
-            ].map(action => {
+            ].filter(action => !action.ownerOnly || isOwner).map(action => {
               const Icon = action.icon;
               const c    = colorMap[action.color];
               return (

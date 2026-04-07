@@ -90,7 +90,7 @@ export default function ExpiringItems() {
           </div>
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Expiring Items</h3>
-            <p className="text-sm text-slate-500 mt-0.5">Monitor batch expiry and act before stock goes to waste</p>
+            <p className="text-sm text-slate-500 mt-0.5">Monitor product expiry and act before stock goes to waste</p>
           </div>
         </div>
         <button onClick={fetchData} disabled={fetching}
@@ -109,7 +109,7 @@ export default function ExpiringItems() {
       {!fetching && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Total Batches</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Total Products</p>
             <p className="text-2xl font-bold text-slate-800">{allItems.length}</p>
           </div>
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 shadow-sm">
@@ -142,7 +142,7 @@ export default function ExpiringItems() {
       <div className="relative mb-5">
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search by batch number, product name or code…"
+          placeholder="Search by purchase order number, product name or code…"
           className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-11 py-3.5 text-base text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-400 transition-all shadow-sm"
         />
         {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={16} /></button>}
@@ -156,7 +156,7 @@ export default function ExpiringItems() {
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
           <CheckCircle size={40} className="mx-auto mb-3 text-teal-400 opacity-60" />
           <p className="font-bold text-base text-slate-700">
-            {search ? 'No batches match your search.' : tab === 'expiring' ? 'No batches expiring soon.' : 'No expired batches.'}
+            {search ? 'No products match your search.' : tab === 'expiring' ? 'No products expiring soon.' : 'No expired products.'}
           </p>
           {!search && tab === 'expiring' && <p className="text-sm text-slate-400 mt-1">Your inventory is looking fresh!</p>}
         </div>
@@ -185,7 +185,10 @@ export default function ExpiringItems() {
                       <span className="text-slate-400">Expiry: </span>
                       <span className={`font-semibold ${isExpired ? 'text-red-600' : isCritical ? 'text-amber-700' : 'text-slate-700'}`}>{batch.expiryDate ?? '—'}</span>
                     </div>
+                    <div><span className="text-slate-400">Location: </span><span className="font-semibold text-slate-700">{batch.location || 'N/A'}</span></div> 
                   </div>
+                  
+
                   <button onClick={() => navigate('/dashboard/purchase')}
                     className="w-full flex items-center justify-center gap-1.5 text-sm font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 py-2 rounded-xl transition-colors">
                     <ShoppingBag size={14} />Restock
@@ -201,12 +204,13 @@ export default function ExpiringItems() {
                 <thead className="bg-orange-500">
                   <tr>
                     <th className={thCls}>#</th>
-                    <th className={thCls}>Batch No</th>
+                    <th className={thCls}>Purchase Order No</th>
                     <th className={thCls}>Product Name</th>
                     <th className={thCls}>Code</th>
                     <th className={thCls}>Quantity</th>
                     <th className={thCls}>Expiry Date</th>
                     <th className={thCls}>Status</th>
+                    <th className={thCls}>Location</th>
                     <th className={thCls}>Action</th>
                   </tr>
                 </thead>
@@ -232,6 +236,7 @@ export default function ExpiringItems() {
                           </span>
                         </td>
                         <td className="px-4 py-3">{d !== null ? <StatusBadge days={d} /> : <span className="text-sm text-slate-400">—</span>}</td>
+                        <td className="px-4 py-3"><span className="text-sm text-slate-700">{batch.location || 'N/A'}</span></td>
                         <td className="px-4 py-3">
                           <button onClick={() => navigate('/dashboard/purchase')}
                             className="flex items-center gap-1.5 text-sm font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap">

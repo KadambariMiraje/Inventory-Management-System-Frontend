@@ -12,7 +12,6 @@ const DEFAULT_CATEGORIES = [
   'Clothing', 'Stationery', 'Grocery', 'Other',
 ];
 
-/*  Confirm dialog */
 function ConfirmDialog({ message, onConfirm, onCancel, isDeactivate }) {
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
@@ -43,7 +42,6 @@ function ConfirmDialog({ message, onConfirm, onCancel, isDeactivate }) {
   );
 }
 
-/*  Edit Product modal */
 function EditProductModal({ product, onSave, onClose }) {
   const [form, setForm] = useState({
     productName:   product.productName   || '',
@@ -145,13 +143,11 @@ function EditProductModal({ product, onSave, onClose }) {
   );
 }
 
-/*  Edit Batch modal */
 function EditBatchModal({ batch, onSave, onClose }) {
   const [form, setForm] = useState({
-    batchNumber:     batch.batchNumber     || '',
-    currentQuantity: batch.currentQuantity || '',
-    purchasePrice:   batch.purchasePrice   || '',
-    expiryDate:      batch.expiryDate      || '',
+    batchNumber: batch.batchNumber || '',
+    expiryDate:  batch.expiryDate  || '',
+    location:    batch.location    || '',
   });
   const [saving, setSaving] = useState(false);
   const [err, setErr]       = useState('');
@@ -163,11 +159,10 @@ function EditBatchModal({ batch, onSave, onClose }) {
     e.preventDefault(); setSaving(true); setErr('');
     try {
       await batchAPI.editBatch(batch.id, {
-        id:              batch.id,
-        batchNumber:     form.batchNumber.trim(),
-        currentQuantity: parseInt(form.currentQuantity),
-        purchasePrice:   parseFloat(form.purchasePrice),
-        expiryDate:      form.expiryDate || null,
+        id:          batch.id,
+        batchNumber: form.batchNumber.trim(),
+        expiryDate:  form.expiryDate || null,
+        location:    form.location.trim() || null,
       });
       onSave();
     } catch (err) { setErr(typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to update batch.'); }
@@ -187,25 +182,17 @@ function EditBatchModal({ batch, onSave, onClose }) {
               <AlertCircle size={16} className="flex-shrink-0" />{err}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Batch Number</label>
-              <input className={inputCls} value={form.batchNumber} onChange={e => setForm({...form, batchNumber: e.target.value})} required />
-            </div>
-            <div>
-              <label className={labelCls}>Quantity</label>
-              <input className={inputCls} type="number" min="0" value={form.currentQuantity}
-                onChange={e => setForm({...form, currentQuantity: e.target.value})} required />
-            </div>
-          </div>
           <div>
-            <label className={labelCls}>Purchase Price (₹)</label>
-            <input className={inputCls} type="number" step="0.01" min="0" value={form.purchasePrice}
-              onChange={e => setForm({...form, purchasePrice: e.target.value})} required />
+            <label className={labelCls}>Purchase Order No</label>
+            <input className={inputCls + " opacity-60 cursor-not-allowed"} value={form.batchNumber} disabled />
           </div>
           <div>
             <label className={labelCls}>Expiry Date</label>
             <input className={inputCls} type="date" value={form.expiryDate || ''} onChange={e => setForm({...form, expiryDate: e.target.value})} />
+          </div>
+          <div>
+            <label className={labelCls}>Location</label>
+            <input className={inputCls} type="text" value={form.location || ''} onChange={e => setForm({...form, location: e.target.value})} />
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
@@ -221,7 +208,6 @@ function EditBatchModal({ batch, onSave, onClose }) {
   );
 }
 
-/*  Main Inventory component  */
 export default function Inventory() {
   const { user, token, loading: authLoading, isOwner } = useAuth();
   const navigate = useNavigate();
@@ -299,11 +285,13 @@ export default function Inventory() {
   if (authLoading) return null;
 
   const totalStock = products.reduce((sum, p) => sum + (p.totalQuantity || 0), 0);
-  const thCls = "px-4 py-3 text-left text-sm font-bold text-white uppercase tracking-wide whitespace-nowrap";
+
+  const thCls     = "px-4 py-3 text-left text-sm font-bold text-white uppercase tracking-wide whitespace-nowrap";
+  const thBatchCls = "px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide whitespace-nowrap";
 
   return (
     <div>
-
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200">
@@ -323,6 +311,7 @@ export default function Inventory() {
         </button>
       </div>
 
+      {/* Toast */}
       {msg && (
         <div className={`flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-5 text-base font-medium ${
           msg.type === 'success' ? 'bg-teal-50 text-teal-800 border border-teal-200' : 'bg-red-50 text-red-800 border border-red-200'
@@ -333,6 +322,7 @@ export default function Inventory() {
         </div>
       )}
 
+      {/* Search */}
       <div className="relative mb-5">
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -353,15 +343,15 @@ export default function Inventory() {
         </div>
       ) : (
         <>
+          {/* ── MOBILE cards ── */}
           <div className="md:hidden space-y-4">
             {filtered.map(product => {
               const isOpen   = !!expanded[product.productCode];
               const totalQty = product.totalQuantity || 0;
               const minLevel = product.minStockLevel ?? 0;
-              const isLow = totalQty < minLevel;
+              const isLow    = totalQty < minLevel;
               return (
                 <div key={product.productCode} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
                   <div className="flex items-start justify-between p-4 gap-3">
                     <button onClick={() => toggleExpand(product.productCode)} className="mt-0.5 p-1 rounded-lg hover:bg-slate-100 text-slate-400 flex-shrink-0">
                       {isOpen ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
@@ -370,9 +360,7 @@ export default function Inventory() {
                       <p className="text-base font-bold text-slate-800 truncate">{product.productName}</p>
                       <span className="font-mono text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{product.productCode}</span>
                     </div>
-                    
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      
                       {isOwner && (
                         <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
                           className="p-2 rounded-xl hover:bg-teal-100 text-slate-400 hover:text-teal-700 transition-colors" title="View history">
@@ -408,10 +396,6 @@ export default function Inventory() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Per Item</p>
-                      <p className="text-sm font-semibold text-slate-700">₹{product.perItemPrice?.toFixed(2) ?? '0.00'}</p>
-                    </div>
-                    <div>
                       <p className="text-xs text-slate-400 mb-0.5">Total Value</p>
                       <p className="text-sm font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</p>
                     </div>
@@ -420,11 +404,11 @@ export default function Inventory() {
                   {isOpen && (
                     <div className="border-t-2 border-teal-100 bg-slate-50">
                       <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-                        <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Batches</span>
+                        <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Purchases</span>
                         <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">{(product.batches || []).length}</span>
                       </div>
                       {(!product.batches || product.batches.length === 0) ? (
-                        <p className="text-sm text-slate-400 text-center py-4">No batches for this product.</p>
+                        <p className="text-sm text-slate-400 text-center py-4">No purchases for this product.</p>
                       ) : (
                         <div className="px-3 pb-3 space-y-2">
                           {product.batches.map(batch => {
@@ -449,12 +433,15 @@ export default function Inventory() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                   <div><span className="text-slate-400">Qty: </span><span className="font-semibold text-slate-700">{batch.currentQuantity} {product.defaultUnits || 'units'}</span></div>
-                                  <div><span className="text-slate-400">Price: </span><span className="font-semibold text-slate-700">₹{batch.purchasePrice?.toFixed(2)}</span></div>
                                   <div className="col-span-2">
                                     <span className="text-slate-400">Expiry: </span>
                                     {batch.expiryDate
                                       ? <><span className={`font-semibold ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>{batch.expiryDate}</span>{isExpired && <span className="ml-1 bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded text-[10px]">EXPIRED</span>}</>
                                       : <span className="text-slate-400">No expiry</span>}
+                                  </div>
+                                  <div className="col-span-2">
+                                    <span className="text-slate-400">Location: </span>
+                                    <span className="font-semibold text-slate-700">{batch.location || 'N/A'}</span>
                                   </div>
                                 </div>
                               </div>
@@ -469,18 +456,26 @@ export default function Inventory() {
             })}
           </div>
 
-  
+          {/* ── DESKTOP table ── */}
           <div className="hidden md:block rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse bg-teal-600">
-                <thead >
+              <table className="w-full border-collapse bg-teal-600 table-fixed" >
+                <colgroup>
+                  <col style={{ width: '48px' }} />
+                  <col style={{ width: '24%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '15%' }} />
+                  {isOwner && <col style={{ width: '20%' }} />}
+                </colgroup>
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 w-10" />
+                    <th style={{width: '48px'}} />
                     <th className={thCls}>Product Name</th>
                     <th className={thCls}>Code</th>
                     <th className={thCls}>Category</th>
                     <th className={thCls}>Stock</th>
-                    <th className={thCls}>Per Item</th>
                     <th className={thCls}>Total Value</th>
                     {isOwner && <th className={thCls + " text-right"}>Actions</th>}
                   </tr>
@@ -490,7 +485,7 @@ export default function Inventory() {
                     const isOpen   = !!expanded[product.productCode];
                     const totalQty = product.totalQuantity || 0;
                     const minLevel = product.minStockLevel ?? 0;
-                    const isLow = totalQty < minLevel;
+                    const isLow    = totalQty < minLevel;
                     return (
                       <React.Fragment key={product.productCode}>
                         <tr className={`transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-teal-50`}>
@@ -499,9 +494,15 @@ export default function Inventory() {
                               {isOpen ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
                             </button>
                           </td>
-                          <td className="px-4 py-3"><span className="text-base font-bold text-slate-800">{product.productName}</span></td>
-                          <td className="px-4 py-3"><span className="font-mono text-sm font-semibold text-teal-700 bg-teal-50 px-2 py-1 rounded-lg">{product.productCode}</span></td>
-                          <td className="px-4 py-3"><span className="text-sm font-semibold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg">{product.category}</span></td>
+                          <td className="px-4 py-3 truncate">
+                            <span className="text-base font-bold text-slate-800">{product.productName}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-mono text-sm font-semibold text-teal-700 bg-teal-50 px-2 py-1 rounded-lg">{product.productCode}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-semibold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg">{product.category}</span>
+                          </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <span className={`text-base font-bold ${isLow ? 'text-red-600' : 'text-slate-800'}`}>{totalQty}</span>
@@ -509,54 +510,55 @@ export default function Inventory() {
                               {isLow && <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-md">LOW</span>}
                             </div>
                           </td>
-                          <td className="px-4 py-3"><span className="text-base font-semibold text-slate-700">₹{product.perItemPrice?.toFixed(2) ?? '0.00'}</span></td>
-                          <td className="px-4 py-3"><span className="text-base font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</span></td>
-                          {/* ── DESKTOP product actions ── */}
                           <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {/* History — owner only */}
-                              {isOwner && (
+                            <span className="text-base font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</span>
+                          </td>
+                          {isOwner && (
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-1.5">
                                 <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
                                   className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="View history">
                                   <History size={16} />
                                 </button>
-                              )}
-                              {isOwner && (
-                                <>
-                                  <button onClick={() => setEditProduct(product)}
-                                    className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit">
-                                    <Pencil size={16} />
-                                  </button>
-                                  {/* Deactivate icon for product */}
-                                  <button onClick={() => handleDeleteProduct(product)}
-                                    className="p-2 rounded-xl hover:bg-orange-100 text-slate-500 hover:text-orange-600 transition-colors" title="Deactivate">
-                                    <PowerOff size={16} />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
+                                <button onClick={() => setEditProduct(product)}
+                                  className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="Edit">
+                                  <Pencil size={16} />
+                                </button>
+                                <button onClick={() => handleDeleteProduct(product)}
+                                  className="p-2 rounded-xl hover:bg-orange-100 text-slate-500 hover:text-orange-600 transition-colors" title="Deactivate">
+                                  <PowerOff size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
 
                         {isOpen && (
                           <tr>
-                            <td colSpan={8} className="p-0 bg-slate-50 border-t-2 border-teal-100">
+                            <td colSpan={isOwner ? 7 : 6} className="p-0 bg-slate-50 border-t-2 border-teal-100">
                               <div className="flex items-center gap-2 px-6 pt-3 pb-2">
-                                <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Batches</span>
+                                <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Purchases</span>
                                 <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">{(product.batches || []).length}</span>
                               </div>
                               {(!product.batches || product.batches.length === 0) ? (
-                                <p className="text-sm text-slate-400 text-center py-5 pb-6">No batches for this product.</p>
+                                <p className="text-sm text-slate-400 text-center py-5 pb-6">No purchases for this product.</p>
                               ) : (
                                 <div className="px-4 pb-4">
-                                  <table className="w-full border-collapse">
+                                  <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+                                    <colgroup>
+                                      <col style={{ width: '30%' }} />
+                                      <col style={{ width: '20%' }} />
+                                      <col style={{ width: '20%' }} />
+                                      <col style={{ width: '20%' }} />
+                                      {isOwner && <col style={{ width: '10%' }} />}
+                                    </colgroup>
                                     <thead>
                                       <tr className="bg-slate-200">
-                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Batch No</th>
-                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Quantity</th>
-                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Batch Purchase Price</th>
-                                        <th className="px-4 py-2.5 text-left text-sm font-bold text-slate-700 uppercase tracking-wide">Expiry Date</th>
-                                        {isOwner && <th className="px-4 py-2.5 text-right text-sm font-bold text-slate-700 uppercase tracking-wide">Actions</th>}
+                                        <th className={thBatchCls}>Purchase Order No</th>
+                                        <th className={thBatchCls}>Quantity</th>
+                                        <th className={thBatchCls}>Expiry Date</th>
+                                        <th className={thBatchCls}>Location</th>
+                                        {isOwner && <th className={thBatchCls + " text-right"}>Actions</th>}
                                       </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -565,9 +567,13 @@ export default function Inventory() {
                                         return (
                                           <tr key={batch.id ?? batch.batchNumber}
                                             className={`${isExpired ? 'bg-red-50' : bi % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-teal-50 transition-colors`}>
-                                            <td className="px-4 py-3"><span className="font-mono text-sm font-bold text-teal-700">{batch.batchNumber}</span></td>
-                                            <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">{batch.currentQuantity}</span><span className="text-sm text-slate-500 ml-1">{product.defaultUnits || 'units'}</span></td>
-                                            <td className="px-4 py-3"><span className="text-base font-semibold text-slate-800">₹{batch.purchasePrice?.toFixed(2)}</span></td>
+                                            <td className="px-4 py-3 truncate">
+                                              <span className="font-mono text-sm font-bold text-teal-700">{batch.batchNumber}</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                              <span className="text-base font-semibold text-slate-800">{batch.currentQuantity}</span>
+                                              <span className="text-sm text-slate-500 ml-1">{product.defaultUnits || 'units'}</span>
+                                            </td>
                                             <td className="px-4 py-3">
                                               {batch.expiryDate ? (
                                                 <div className="flex items-center gap-2">
@@ -576,7 +582,9 @@ export default function Inventory() {
                                                 </div>
                                               ) : <span className="text-sm text-slate-400">No expiry</span>}
                                             </td>
-                                            {/* ── DESKTOP batch actions — owner only ── */}
+                                            <td className="px-4 py-3 truncate">
+                                              <span className="text-sm text-slate-700">{batch.location || 'N/A'}</span>
+                                            </td>
                                             {isOwner && (
                                               <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-1.5">
@@ -611,11 +619,9 @@ export default function Inventory() {
         </>
       )}
 
-      {/* Modals */}
       {editProduct && <EditProductModal product={editProduct} onSave={() => { setEditProduct(null); showMsg('success', 'Product updated.'); fetchProducts(); }} onClose={() => setEditProduct(null)} />}
       {editBatch   && <EditBatchModal   batch={editBatch}     onSave={() => { setEditBatch(null);   showMsg('success', 'Batch updated.');   fetchProducts(); }} onClose={() => setEditBatch(null)} />}
       {confirm     && <ConfirmDialog    message={confirm.message} isDeactivate={confirm.isDeactivate} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}
-
     </div>
   );
 }

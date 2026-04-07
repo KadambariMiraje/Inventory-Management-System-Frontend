@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://65-2-189-227.nip.io/api';
-// const BASE_URL = import.meta.env.VITE_API_URL || 'http://10.29.70.131:8083/api';
+// const BASE_URL = import.meta.env.VITE_API_URL || 'http://10.253.21.131:8083/api';
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -47,6 +47,10 @@ export const productAPI = {
   getProductUnit: (name)          => api.get(`/product/unit/${encodeURIComponent(name)}`),
   editProduct:      (code, data) => api.put('/product', { productCode: code, ...data }),
   deleteProduct:    (code)       => api.delete(`/product/${code}`),
+  generateProductCode: ()         => api.get('/product/generate/product'),
+  checkProductCode:    (code)     => api.get(`/product/check/productcode/${encodeURIComponent(code)}`),
+  generatePurchaseOrderCode: ()         => api.get('/product/generate/batch'),
+  checkPurchaseOrderCode:    (code)     => api.get(`/product/check/batch/${encodeURIComponent(code)}`),
 };
 
 export const batchAPI = {

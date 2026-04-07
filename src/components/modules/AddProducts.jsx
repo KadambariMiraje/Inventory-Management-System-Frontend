@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI } from '../../hooks/useApi';
-import { PackagePlus, ShoppingCart, CheckCircle, AlertCircle, Loader2, X, ChevronDown } from 'lucide-react';
+import { PackagePlus, ShoppingCart, CheckCircle, AlertCircle, Loader2, X, ChevronDown, RefreshCw } from 'lucide-react';
 
 const EMPTY_FORM = {
   productCode:   '',
@@ -23,16 +23,53 @@ export default function AddProduct() {
   const { user, token, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm]             = useState(EMPTY_FORM);
-  const [msg, setMsg]               = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  const [isCustomCat, setIsCustomCat]   = useState(false);
-  const [customCat,   setCustomCat]     = useState('');
+  const [form, setForm]                   = useState(EMPTY_FORM);
+  const [msg, setMsg]                     = useState(null);
+  const [submitting, setSubmitting]       = useState(false);
+  const [isCustomCat, setIsCustomCat]     = useState(false);
+  const [customCat, setCustomCat]         = useState('');
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [codeStatus, setCodeStatus]       = useState(null); // 'available' | 'taken' | null
 
   useEffect(() => {
     if (!loading && (!user || !token)) navigate('/login');
   }, [user, token, loading, navigate]);
+
+  // ── Auto-generate code on mount ──────────────────────────────
+  const generateAndVerifyCode = useCallback(async () => {
+    setGeneratingCode(true);
+    setCodeStatus(null);
+    try {
+      // Step 1 — generate a code from backend
+      const genRes = await productAPI.generateProductCode();
+      const code = genRes.data;
+
+      // Step 2 — check if it already exists
+      const checkRes = await productAPI.checkProductCode(code);
+      const exists = checkRes.data; // true or false
+
+      if (exists) {
+        // Code taken — generate again automatically (recursive)
+        await generateAndVerifyCode();
+      } else {
+        // Code is free — set it in form
+        setForm(prev => ({ ...prev, productCode: code }));
+        setCodeStatus('available');
+      }
+    } catch {
+      setCodeStatus(null);
+      // If generation fails, leave field empty for manual entry
+    } finally {
+      setGeneratingCode(false);
+    }
+  }, []);
+
+  // Run once when component mounts and user is authenticated
+  useEffect(() => {
+    if (!loading && user && token) {
+      generateAndVerifyCode();
+    }
+  }, [loading, user, token, generateAndVerifyCode]);
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
@@ -40,7 +77,11 @@ export default function AddProduct() {
     </div>
   );
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    // If user manually edits the product code, clear status
+    if (e.target.name === 'productCode') setCodeStatus(null);
+  };
 
   const handleCategorySelect = (e) => {
     const val = e.target.value;
@@ -68,6 +109,9 @@ export default function AddProduct() {
       setMsg({ type: 'success', text: res.data });
       setForm(EMPTY_FORM);
       setIsCustomCat(false); setCustomCat('');
+      setCodeStatus(null);
+      // Auto-generate new code for next product
+      generateAndVerifyCode();
     } catch (err) {
       setMsg({ type: 'error', text: typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message || 'Failed to add product. Please try again.' });
     } finally { setSubmitting(false); }
@@ -107,12 +151,44 @@ export default function AddProduct() {
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            {/* Product Code — auto-generated with regenerate button */}
             <div>
               <label className={labelCls}>Product Code</label>
-              <input type="text" name="productCode" className={inputCls}
-                value={form.productCode} onChange={handleChange}
-                placeholder="e.g. PROD-001" required disabled={submitting} />
+              <div className="relative flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    name="productCode"
+                    className={inputCls + (codeStatus === 'available' ? ' border-teal-400 pr-8' : '')}
+                    value={form.productCode}
+                    onChange={handleChange}
+                    placeholder={generatingCode ? 'Generating…' : 'e.g. PROD-12345'}
+                    required
+                    readOnly
+                  />
+                  {/* Available tick inside input */}
+                  {codeStatus === 'available' && !generatingCode && (
+                    <CheckCircle size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
+                  )}
+                  {/* Spinner inside input while generating */}
+                  {generatingCode && (
+                    <Loader2 size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-400 animate-spin pointer-events-none" />
+                  )}
+                </div>
+                {/* Regenerate button */}
+                <button
+                  type="button"
+                  onClick={generateAndVerifyCode}
+                  disabled={submitting || generatingCode}
+                  title="Generate new code"
+                  className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-400 hover:text-teal-600 hover:border-teal-400 transition-all disabled:opacity-50">
+                  <RefreshCw size={15} className={generatingCode ? 'animate-spin' : ''} />
+                </button>
+              </div>
+             
             </div>
+
             <div>
               <label className={labelCls}>Product Name</label>
               <input type="text" name="productName" className={inputCls}
@@ -167,7 +243,7 @@ export default function AddProduct() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button type="submit" disabled={submitting}
+            <button type="submit" disabled={submitting || generatingCode}
               className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl py-3 sm:py-3.5 text-sm sm:text-base transition-all shadow-lg shadow-teal-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
               {submitting
                 ? <><Loader2 size={18} className="animate-spin" />Adding…</>
