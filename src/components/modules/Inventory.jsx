@@ -467,7 +467,7 @@ export default function Inventory() {
                   <col style={{ width: '13%' }} />
                   <col style={{ width: '15%' }} />
                   <col style={{ width: '15%' }} />
-                  {isOwner && <col style={{ width: '20%' }} />}
+                  <col style={{ width: '20%' }} />
                 </colgroup>
                 <thead>
                   <tr>
@@ -477,7 +477,7 @@ export default function Inventory() {
                     <th className={thCls}>Category</th>
                     <th className={thCls}>Stock</th>
                     <th className={thCls}>Total Value</th>
-                    {isOwner && <th className={thCls + " text-right"}>Actions</th>}
+                    <th className={thCls + " text-right"}>{isOwner ? "Actions" : ""}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -513,8 +513,9 @@ export default function Inventory() {
                           <td className="px-4 py-3">
                             <span className="text-base font-semibold text-slate-700">₹{product.totalPurchasePrice?.toFixed(2) ?? '0.00'}</span>
                           </td>
-                          {isOwner && (
+                          
                             <td className="px-4 py-3">
+                              {isOwner && (
                               <div className="flex items-center justify-end gap-1.5">
                                 <button onClick={() => navigate(`/dashboard/inventory/history/${product.productCode}`)}
                                   className="p-2 rounded-xl hover:bg-teal-100 text-slate-500 hover:text-teal-700 transition-colors" title="View history">
@@ -529,13 +530,14 @@ export default function Inventory() {
                                   <PowerOff size={16} />
                                 </button>
                               </div>
+                            )}
                             </td>
-                          )}
+                          
                         </tr>
 
                         {isOpen && (
                           <tr>
-                            <td colSpan={isOwner ? 7 : 6} className="p-0 bg-slate-50 border-t-2 border-teal-100">
+                            <td colSpan={7} className="p-0 bg-slate-50 border-t-2 border-teal-100">
                               <div className="flex items-center gap-2 px-6 pt-3 pb-2">
                                 <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Purchases</span>
                                 <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">{(product.batches || []).length}</span>
